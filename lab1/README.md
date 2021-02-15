@@ -1,6 +1,6 @@
 # ECE 477 Lab 1
 ## Part A
-Prints the sizes of the data types in decimal and hex:
+Prints the sizes of the data types:
 ```c
 char
 short
