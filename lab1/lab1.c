@@ -1,8 +1,22 @@
+/*
+
+The purpose of this program is to print the sizes
+of various data types and constants defined in
+the header file <limits.h>
+
+Author: Ryan Kinney
+ECE 477 - Spring 2021
+February 18, 2021
+
+*/
+
+
 #include <stdio.h>
 #include <limits.h>
 
 int main() {
 	printf("Part A:\n");
+
 	// The first part of Part A of the lab asks to print the sizes of various variable types
 	printf("The size of char is %d bytes\n",sizeof(char));
 	printf("The size of short is %d bytes\n", sizeof(short));
@@ -21,6 +35,7 @@ int main() {
 	// Part B asks for something interesting, cool, and related to Part A
 	// prints the size of some other data types and more values defined in <limits.h>
 	printf("Part B:\n");
+
 	printf("The size of long long is %d bytes\n", sizeof(long long));
 	printf("The size of int* is %d bytes\n", sizeof(int*)); // I thought pointers were cool so....
 	printf("The size of char* is %d bytes\n", sizeof(char*)); // yeah.......
