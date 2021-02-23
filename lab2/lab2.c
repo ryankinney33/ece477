@@ -10,6 +10,7 @@ int main(int argc, char* argv[]){
 	if(argc != 2){
 		printf("Error: Expected 1 argument, received %d.\n", argc-1);
 		printf("Usage is %s number, where number is an integer constant.\n",argv[0]);
+		set_leds(0);
 		exit(1);
 	}
 
