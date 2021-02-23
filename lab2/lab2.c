@@ -2,8 +2,7 @@
 #include <stdlib.h>
 #include <wiringPi.h>
 
-// subroutines for initializing the LEDs and setting the states
-void init_leds();
+// subroutine for initializing the LEDs and setting the states
 void set_leds(int num);
 
 int main(int argc, char* argv[]){
@@ -24,7 +23,8 @@ int main(int argc, char* argv[]){
 			if(!sscanf(argv[1],"%u",&number)){
 				// something that was not a number was entered
 				printf("Error: Illegal input.\n");
-				printf("What was entered: %s.\nExpected a number like 255, 0xFF, or 0377.\n",argv[1]);
+				printf("What was entered: %s\nExpected a number like 255, 0xFF, or 0377.\n",argv[1]);
+				set_leds(0); // illegal input, turn off LEDs
 				exit(2);
 			}
 		}
@@ -34,17 +34,17 @@ int main(int argc, char* argv[]){
 	if(number > 0xFF){ // only 0-0xFF is supported (0-255, 0-0377)
 		printf("Error: Input out of range.\n");
 		printf("The input must be in the range of 0-0xFF, 0-255, or 0-0377.\n");
+		set_leds(0); // illegal input, turn off LEDs
 		exit(3);
 	}
 
 	// finally, set the LEDs to the output specified by number
-	init_leds();
 	set_leds(number);
 
 	exit(0);
 }
 
-void init_leds(){
+void set_leds(int num){
 	wiringPiSetup();
 
 	/* Pins used:
@@ -57,15 +57,12 @@ void init_leds(){
 		LED 6: WiringPi pin 6, BCM GPIO25, Physical pin 22
 		LED 7: WiringPi pin 7, BCM GPIO4, Physical pin 7
 	*/
-	for(int i = 0; i < 8; ++i){
-		// iterate over pins WiringPi pins 0-7, setting them to output
-		pinMode(i,OUTPUT);
-	}
-}
 
-void set_leds(int num){
-	// set each LED according to the value of its corresponding bits
 	for(int i = 0; i < 8; ++i){
+		// iterate over WiringPi pins 0-7, setting them to output
+		pinMode(i,OUTPUT);
+
+		// set each LED according to the value of its corresponding bits
 		// to get the value of the current bit, do num&(1<<i)
 		// if that evaluates to true, set LED to high, else low
 		digitalWrite(i, (num&(1<<i))? HIGH:LOW);
