@@ -2,10 +2,11 @@
 #include <stdlib.h>
 
 int main(int argc, char* argv[]){
-	// print the args to stdout
-	for(int i = 0; i < argc; ++i){
-		printf("argv[%d] is %s\n",i,argv[i]);
+	// we want to receive 1 command line argument, so argc should be 2
+	if(argc != 2){
+		printf("Error: Expected 1 argument, received %d.\n", argc-1);
+		printf("Usage is %s number, where number is an integer constant.\n",argv[0]);
+		exit(1);
 	}
-
-	return 0;
+	exit(0);
 }
