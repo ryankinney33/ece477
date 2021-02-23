@@ -11,12 +11,12 @@ int main(int argc, char* argv[]){
 
 	// next, we want to extract the integer value into an int
 	// program accepts decimal, octal, and hex
-	int number;
+	unsigned int number;
 	if(!sscanf(argv[1],"0%o",&number)){
 		// sscanf failed to read an octal number, check for hex
 		if(!sscanf(argv[1],"0x%x",&number)){
 			// sscanf failed to read a hexadecimal number, check for decimal
-			if(!sscanf(argv[1],"%d",&number)){
+			if(!sscanf(argv[1],"%u",&number)){
 				// something that was not a number was entered
 				printf("Error: Illegal input.\n");
 				printf("What was entered: %s.\nExpected a number like 255, 0xFF, or 0377.\n",argv[1]);
@@ -25,6 +25,13 @@ int main(int argc, char* argv[]){
 		}
 	}
 
-	printf("Received %d, which is 0x%X, which is 0%o.\n",number,number,number);
+	// next, make sure that the number was in range
+	if(number > 0xFF){ // only 0-0xFF is supported (0-255, 0-0377)
+		printf("Error: Input out of range.\n");
+		printf("The input must be in the range of 0-0xFF, 0-255, or 0-0377.\n");
+		exit(3);
+	}
+
+	printf("Received %u, which is 0x%X, which is 0%o.\n",number,number,number);
 	exit(0);
 }
