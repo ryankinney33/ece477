@@ -1,5 +1,10 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <wiringPi.h>
+
+// subroutines for initializing the LEDs and setting the states
+void init_leds();
+void set_leds(int num);
 
 int main(int argc, char* argv[]){
 	// we want to receive 1 command line argument, so argc should be 2
@@ -32,6 +37,39 @@ int main(int argc, char* argv[]){
 		exit(3);
 	}
 
-	printf("Received %u, which is 0x%X, which is 0%o.\n",number,number,number);
+	// finally, set the LEDs to the output specified by number
+	init_leds();
+	//set_leds(number);
+	// flash the LEDs
+	while(1){
+		for(int i = 0; i<8; i++){
+			digitalWrite(i,HIGH);
+			delay(50);
+		}
+		for(int i = 0; i<8; ++i){
+			digitalWrite(i,LOW);
+			delay(50);
+		}
+	}
 	exit(0);
+}
+
+void init_leds(){
+	wiringPiSetup();
+
+	/* Pins used:
+		LED 0: WiringPi pin 0, BCM GPIO17, Physical pin 17
+		LED 1: WiringPi pin 1, BCM GPIO18, Physical pin 12
+		LED 2: WiringPi pin 2, BCM GPIO27, Physical pin 13
+		LED 3: WiringPi pin 3, BCM GPIO22, Physical pin 15
+		LED 4: WiringPi pin 4, BCM GPIO23, Physical pin 16
+		LED 5: WiringPi pin 5, BCM GPIO24, Physical pin 18
+		LED 6: WiringPi pin 6, BCM GPIO25, Physical pin 22
+		LED 7: WiringPi pin 7, BCM GPIO4, Physical pin 7
+	*/
+
+	for(int i = 0; i < 8; ++i){
+		// iterate over pins WiringPi pins 0-7, setting them to output
+		pinMode(i,OUTPUT);
+	}
 }
