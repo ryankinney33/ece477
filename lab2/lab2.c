@@ -39,18 +39,8 @@ int main(int argc, char* argv[]){
 
 	// finally, set the LEDs to the output specified by number
 	init_leds();
-	//set_leds(number);
-	// flash the LEDs
-	while(1){
-		for(int i = 0; i<8; i++){
-			digitalWrite(i,HIGH);
-			delay(50);
-		}
-		for(int i = 0; i<8; ++i){
-			digitalWrite(i,LOW);
-			delay(50);
-		}
-	}
+	set_leds(number);
+
 	exit(0);
 }
 
@@ -67,9 +57,17 @@ void init_leds(){
 		LED 6: WiringPi pin 6, BCM GPIO25, Physical pin 22
 		LED 7: WiringPi pin 7, BCM GPIO4, Physical pin 7
 	*/
-
 	for(int i = 0; i < 8; ++i){
 		// iterate over pins WiringPi pins 0-7, setting them to output
 		pinMode(i,OUTPUT);
+	}
+}
+
+void set_leds(int num){
+	// set each LED according to the value of its corresponding bits
+	for(int i = 0; i < 8; ++i){
+		// to get the value of the current bit, do num&(1<<i)
+		// if that evaluates to true, set LED to high, else low
+		digitalWrite(i, (num&(1<<i))? HIGH:LOW);
 	}
 }
