@@ -8,5 +8,11 @@ int main(int argc, char* argv[]){
 		printf("Usage is %s number, where number is an integer constant.\n",argv[0]);
 		exit(1);
 	}
+
+	// next, we want to extract the integer value into an int
+	// program accepts decimal, octal, and hex
+	int number;
+	sscanf(argv[1],"%d",&number);
+	printf("Received %d, which is 0x%x, which is 0%o.\n",number,number,number);
 	exit(0);
 }
