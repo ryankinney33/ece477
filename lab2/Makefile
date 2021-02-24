@@ -4,15 +4,19 @@
 
 CC=gcc
 
-all: lab2
+all: lab2a lab2b
 
-lab2: lab2.o
-	$(CC) -o lab2 lab2.o -lwiringPi
+lab2a: lab2a.o
+	$(CC) -o lab2a lab2a.o -lwiringPi
+
+lab2b: lab2b.o
+	$(CC) -o lab2b lab2b.o -lwiringPi
 
 %.o: %.cpp
 	$(CC) -c $< -o $@
 
-lab1.o: lab1.c
+lab2a.o: lab2a.c
+lab2b.o: lab2b.c
 
 clean:
-	rm -rf lab2 *.o
+	rm -rf lab2a lab2b *.o
