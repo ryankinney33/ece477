@@ -48,23 +48,33 @@ int main(int argc, char* argv[]){
 	unsigned int number; // the extracted number from the arguments
 
 	for(int i = 1; i < argc; ++i){
-		int test;
 		// check for octal
-		if(test = sscanf(argv[i],"0%o",&number));
+		if(!sscanf(argv[i],"0%o",&number))
+
 		// not octal, check for hex
-		else if(test = sscanf(argv[i],"0x%x",&number));
+		if(!sscanf(argv[i],"0x%x",&number))
 		// not hex, check for decimal
-		else if(test = sscanf(argv[i],"%u",&number));
+
+		if(!sscanf(argv[i],"%u",&number))
+			// invalid input entered, set number to an illegal value
+			number = 0x100;
 
 		// check validity of input
-		if(test==0 || number > 0xFF){
-			// invalid input, complain, do not increment counter, do not save it
+		if(number > 0xFF){
+			// invalid input; complain, do not increment counter, do not save it
 			printf("Error: Illegal input.\n");
 			printf("What was entered: %s\n",argv[i]);
-			printf("Expected an integer constant from 0-255 in decimal, 0-0xFF in hex, or 0-0377 in octal.\n");
+			printf("Expected an integer constant from 0-255 in decimal, 0-0xFF in hex, or 0-0377 in octal.\n\n");
 		}else
 			// save the input and increment the counter
 			valid[size++] = number;
+	}
+
+	if(size == 0){
+		// no valid inputs
+		printf("Error: No valid inputs.\n");
+		printf("Inputs are integer constants from 0-255 in decimal, hex, or octal.\n");
+		exit(2);
 	}
 
 	// flash the LEDs
@@ -72,7 +82,7 @@ int main(int argc, char* argv[]){
 		// for each element in valid, set the LEDS to it, with a small delay
 		for(int i = 0; i < size; i++){
 			set_leds(valid[i]);
-			delay(50);
+			delay(140);
 		}
 	}
 
