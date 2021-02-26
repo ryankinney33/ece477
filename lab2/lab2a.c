@@ -1,3 +1,16 @@
+/*
+
+The purpose of this program is to accept a single command line argument.
+This command line argument is an integer constant in decimal hex or octal.
+8 LEDs are attached to pins (listed in comments below) and will be lit up
+(or shut off) according to the binary representation of that number.
+
+Author: Ryan Kinney
+ECE 477 - Spring 2021
+February 25, 2021
+
+*/
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <wiringPi.h>
@@ -5,6 +18,7 @@
 // subroutine for initializing the LEDs and setting the states
 void set_leds(int num);
 
+// Accepts a command line argument and lights up the LEDs accordingly
 int main(int argc, char* argv[]){
 	// we want to receive 1 command line argument, so argc should be 2
 	if(argc != 2){
@@ -45,6 +59,8 @@ int main(int argc, char* argv[]){
 	exit(0);
 }
 
+// loops through the 8 LED pins, sets them to output
+// then sets them high or low, depending on the parameter num
 void set_leds(int num){
 	wiringPiSetup();
 
@@ -56,14 +72,14 @@ void set_leds(int num){
 		LED 4: WiringPi pin 4, BCM GPIO23, Physical pin 16
 		LED 5: WiringPi pin 5, BCM GPIO24, Physical pin 18
 		LED 6: WiringPi pin 6, BCM GPIO25, Physical pin 22
-		LED 7: WiringPi pin 7, BCM GPIO4, Physical pin 7
+		LED 7: WiringPi pin 7, BCM GPIO4,  Physical pin 7
 	*/
 
 	for(int i = 0; i < 8; ++i){
 		// iterate over WiringPi pins 0-7, setting them to output
 		pinMode(i,OUTPUT);
 
-		// set each LED according to the value of its corresponding bits
+		// set each LED according to the value of its corresponding bit
 		// to get the value of the current bit, do num&(1<<i)
 		// if that evaluates to true, set LED to high, else low
 		digitalWrite(i, (num&(1<<i))? HIGH:LOW);

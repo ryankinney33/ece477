@@ -1,7 +1,22 @@
+/*
+
+The purpose of this program is very similar to lab2a.c
+It accepts multiple command line arguments that are integer constants
+from 0-255 in decimal, 0-0xFF in hex, and 0-0377 in octal.
+Each valid input will then light up the LEDs (this is repeated until the program is killed).
+
+Author: Ryan Kinney
+ECE 477 - Spring 2021
+February 25, 2021
+
+*/
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <wiringPi.h>
 
+
+// Sets up the pins with LEDs connected for outputting
 void LED_setup(){
 	/* Pins used:
 		LED 0: WiringPi pin 0, BCM GPIO17, Physical pin 17
@@ -18,6 +33,8 @@ void LED_setup(){
 	}
 }
 
+// Sets the LEDs according to the binary representation
+// of parameter num
 void set_leds(unsigned int num){
 	for(int i = 0; i < 8; ++i){
 		digitalWrite(i,(num&(1<<i))? HIGH:LOW);
@@ -25,8 +42,8 @@ void set_leds(unsigned int num){
 }
 
 
-// loop through the input arguments, flashing the LEDs accordingly
-// example: if the user enters 5 valid numbers, loop through them, setting the LEDS
+// loops through the input arguments, filters out illegal inputs, and flashes the LEDs accordingly.
+// example: if the user enters 5 valid numbers, loop through them, setting the LEDs
 // to each one, with a small delay between them
 int main(int argc, char* argv[]){
 	// setup the required GPIO pins
