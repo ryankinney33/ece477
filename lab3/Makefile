@@ -15,4 +15,4 @@ lab3a: lab3a.o
 lab3a.o: lab3a.c
 
 clean:
-	rm -rf lab2a lab2b *.o
+	rm -rf lab3a lab3b *.o
