@@ -51,7 +51,7 @@ int main(int argc, char* argv[]){
 
 	if(argc > 2){
 		printf("Error: Expected 0 or 1 argument, received %d\n",argc-1);
-		printf("Usage is %s or %s filepath, where filepath is a path to a file",argv[0],argv[0]);
+		printf("Usage is %s or %s filepath, where filepath is a path to a file\n",argv[0],argv[0]);
 		exit(2);
 	}
 
@@ -70,7 +70,7 @@ int main(int argc, char* argv[]){
 		// the file specified should contain a double as its first number
 		// scan the first number from the file
 		double therm;
-		if(fscanf(fp,"%lf",&therm) == 0){
+		if(!fscanf(fp,"%lf",&therm)){
 			// could not read a number, print an error and exit
 			printf("Error, the first number of the file should be a double constant\n");
 			fclose(fp);

@@ -5,4 +5,4 @@ Read the first number in /proc/loadavg and display a "thermometer code" on the L
 Runs until terminated and updates the LEDs every few seconds.
 
 ## Part B
-(TBA)
+Same as Part A, but the user can specify a different file via command line args
