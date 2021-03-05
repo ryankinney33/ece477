@@ -50,8 +50,9 @@ int main(int argc, char* argv[]){
 	FILE *fp;
 
 	if(argc > 2){
-		printf("Error: Expected 0 or 1 argument, recieved %d\n",argc-1);
+		printf("Error: Expected 0 or 1 argument, received %d\n",argc-1);
 		printf("Usage is %s or %s filepath, where filepath is a path to a file",argv[0],argv[0]);
+		exit(2);
 	}
 
 	while(1){
