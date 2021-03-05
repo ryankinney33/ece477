@@ -1,3 +1,16 @@
+/*
+
+The purpose of this program is to read the one minute load average
+in the file /proc/loadavg, convert it to a thermometer code, and light
+up the 8 LEDs accordingly. If the read value is 4.0, all LEDs should be on.
+Every time the load halves, an LED should be shut off until they are all off.
+
+Author: Ryan Kinney
+ECE 477 - Spring 2021
+March 5, 2021
+
+*/
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>

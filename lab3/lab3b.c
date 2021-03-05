@@ -1,3 +1,18 @@
+/*
+
+The purpose of this program is to a number from a file, convert it to a thermometer code,
+and light up the 8 LEDs accordingly. If the read value is 4.0, all LEDs should be on.
+Every time the value halves, an LED should be shut off until they are all off.
+
+Accepts a command line argument for the path to the file. If no argument is passed,
+the program opens /proc/loadavg and reads the one minute average from it.
+
+Author: Ryan Kinney
+ECE 477 - Spring 2021
+March 5, 2021
+
+*/
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
