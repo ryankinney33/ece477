@@ -34,17 +34,20 @@ int main(){
 		// set the LEDs
 		set_leds(LEDstate);
 
+		int check_delay = 0;
+
 		// wait the delay
 		for(int i = 0; i < delayNum; ++i){
 			// get input from the user
 			get_input(&A);
-			if(A.current && !A.previous){ // button A was just pressed
+			if(A.current && !A.previous && check_delay > 0){ // button A was just pressed
 				// Decrease delay
 				delayNum >>= 1;
 				if(delayNum < 32){ // Reverse the direction if necessary
 					delayNum = 32;
 					direction = -direction;
 				}
+				check_delay = 20;
 			}else{
 				get_input(&B);
 				if(B.current && !B.previous){ // button B was just pressed
@@ -55,8 +58,10 @@ int main(){
 						direction = -direction;
 					}
 				}
+				check_delay = 20;
 			}
 			delay(1);
+			--check_delay;
 		}
 
 		// update the LED according to the direction
