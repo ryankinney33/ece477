@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include <wiringPi.h>
 
+#define LEFT 1
+#define RIGHT -1
 
 void gpio_init();
 void set_leds(int num);
@@ -9,13 +11,29 @@ void set_leds(int num);
 int main(){
 	gpio_init();
 
+	// flags for button pressed status
+	int previous=0, current=0;
+	int direction = LEFT;
 
+	int LEDstate = 0;
 
+	int delayNum = 256;
 
 	while(1){
-		for(int i = 1; i < 129; i <<= 1){
-			set_leds(i);
-			delay(32);
+		// set the LEDs
+		set_leds(LEDstate);
+
+		// wait the delay
+		for(int i = 0; i < delayNum; ++i){
+			delay(1);
+		}
+
+		// update the LED according to the direction
+		LEDstate += direction;
+
+		if(LEDstate < 0 || LEDstate > 7){
+			// place the LED back in range
+			LEDstate = (direction==LEFT)? 0:7;
 		}
 	}
 
@@ -39,11 +57,8 @@ void gpio_init(){
 }
 
 void set_leds(int num){
-	for(int i = 0; i < num; ++i){
-		if(num&(1<<i)){
-			digitalWrite(i,HIGH);
-		}else{
-			digitalWrite(i,LOW);
-		}
+	for(int i = 0; i < 8; ++i){
+		digitalWrite(i,LOW);
 	}
+	digitalWrite(num,HIGH);
 }
