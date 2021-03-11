@@ -5,19 +5,30 @@
 #define LEFT 1
 #define RIGHT -1
 
-void gpio_init();
+
+// struct for input button status
+typedef struct button {
+	int previous, current, pin;
+} button;
+
+
+void gpio_init(button* A, button* B);
 void set_leds(int num);
+void get_input(button* s);
 
 int main(){
-	gpio_init();
+	// create button structs and set up the GPIO pins
+	button A,B;
+	A.pin = 21;
+	A.previous = A.current = 0;
+	B.pin = 22;
+	B.previous = B.current = 0;
+	gpio_init(&A,&B);
 
-	// flags for button pressed status
-	int previous=0, current=0;
+	// set up variables for lighting the LEDs
 	int direction = LEFT;
-
 	int LEDstate = 0;
-
-	int delayNum = 256;
+	int delayNum = 1024;
 
 	while(1){
 		// set the LEDs
@@ -25,6 +36,26 @@ int main(){
 
 		// wait the delay
 		for(int i = 0; i < delayNum; ++i){
+			// get input from the user
+			get_input(&A);
+			if(A.current && !A.previous){ // button A was just pressed
+				// Decrease delay
+				delayNum >>= 1;
+				if(delayNum < 32){ // Reverse the direction if necessary
+					delayNum = 32;
+					direction = -direction;
+				}
+			}else{
+				get_input(&B);
+				if(B.current && !B.previous){ // button B was just pressed
+					// Increase delay
+					delayNum <<= 1;
+					if(delayNum > 1024){ // reverse direction if necessary
+						delayNum = 1024;
+						direction = -direction;
+					}
+				}
+			}
 			delay(1);
 		}
 
@@ -40,20 +71,20 @@ int main(){
 	exit(0);
 }
 
-void gpio_init(){
+void gpio_init(button* A, button* B){
 	wiringPiSetup();
 
 	for(int i = 0; i < 8; ++i){
 		pinMode(i,OUTPUT);
 	}
 
-	// inputs on WiringPi 21 and 22
-	pinMode(21,INPUT);
-	pinMode(22,INPUT);
+	// inputs on the pins in the structs
+	pinMode(A->pin,INPUT);
+	pinMode(B->pin,INPUT);
 
 	// use internal pull down resistors
-	pullUpDnControl(21,PUD_DOWN);
-	pullUpDnControl(22,PUD_DOWN);
+	pullUpDnControl(A->pin,PUD_UP);
+	pullUpDnControl(B->pin,PUD_UP);
 }
 
 void set_leds(int num){
@@ -61,4 +92,10 @@ void set_leds(int num){
 		digitalWrite(i,LOW);
 	}
 	digitalWrite(num,HIGH);
+}
+
+// save the previous input and gets the new input
+void get_input(button* s){
+	s->previous = s->current;
+	s->current = !digitalRead(s->pin);
 }
