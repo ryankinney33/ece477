@@ -70,8 +70,6 @@ int main(){
 	int scoreL = 0; // Left score
 	int scoreR = 0; // Right score
 
-	int delA = 0, delB = 0; // delays to help ensure double inputs dont happen
-
 	while(gameRunning){
 		// check if the LED is off the board
 		if(litLED > 7 || litLED < 0){
