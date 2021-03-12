@@ -17,7 +17,7 @@ void gpio_init(button* A, button* B){
 	wiringPiSetup();
 
 	for(int i = 0; i < 8; ++i){
-	pinMode(i,OUTPUT);
+		pinMode(i,OUTPUT);
 	}
 
 	// inputs on the pins in the structs
