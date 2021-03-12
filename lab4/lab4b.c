@@ -142,4 +142,9 @@ int main(){
 	}
 	// the game has ended, print the final score
 	printf("\n\nGame over.\nFinal Score:\nLeft:  %d\nRight: %d\n",scoreL,scoreR);
+
+	// shut off the LEDs
+	for(int i = 0; i < 7; ++i){
+		digitalWrite(i,LOW);
+	}
 }
