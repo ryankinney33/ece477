@@ -1,6 +1,19 @@
+/*
+	The purpose of this program is to rotate a single lit LED
+	across a row of LEDs. Uses two pushbuttons to control the
+	delay between the LED changes. Button A reduces the delay
+	and button B doubles it. When at the max or minimum delay,
+	the buttons reverse the direction of the LED.
+
+	Author: Ryan Kinney
+	ECE 477 - Spring 2021
+	March 12, 2021
+*/
+
 #include <wiringPi.h>
 #include "gpio.h"
 
+// Macros for controlling the LED direction
 #define LEFT 1
 #define RIGHT -1
 

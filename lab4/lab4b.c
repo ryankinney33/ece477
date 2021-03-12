@@ -1,3 +1,30 @@
+/*
+	The purpose of this program is to something cool
+	related to part A. Implements a simple game with
+	the two buttons and the LED.
+	- When the LED is at the rightmost position and
+	  button A is pressed, the LED will start moving left.
+	- When the LED is at the leftmost position and button
+	  B is pressed, the LED will start moving right.
+	- When a button is pressed when the LED is moving left
+	  or right and is not at the edge, the player who did
+	  not press the button gets a point.
+	- When the game starts, the LED does not move until
+	  button A is pressed, which will start the game.
+	- Whenever a point is scored, the LED will be at
+	  either the leftmost or rightmost edge (depending
+	  on who scored). And will not move until the button
+	  corresponding to that edge is pressed. (Call this serving)
+	- If the LED is not moving, and the player who is not
+	  the server presses the button, nothing happens.
+	  If Ctrl+C (SIGINT) is sent to the program, the game
+	  will end and the final score will be printed.
+
+	Author: Ryan Kinney
+	ECE 477 - March 12, 2021
+	March 12, 2021
+*/
+
 #include "gpio.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -13,15 +40,16 @@
 #define LSERVE 7
 #define RSERVE 0
 
-static int gameRunning = 1;
 
 // used to end the game
-void intHandler(int x){
+static int gameRunning = 1;
+void intHandler(int x){// handles SIGINT to end the game
 	gameRunning = 0;
 }
 
 int main(){
 	// used to process the end of the game
+	// set up the signal handling stuff
 	struct sigaction act;
 	act.sa_handler = intHandler;
 	sigaction(SIGINT,&act,NULL);
