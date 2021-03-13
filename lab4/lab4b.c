@@ -28,7 +28,6 @@
 #include "gpio.h"
 #include <stdio.h>
 #include <stdlib.h>
-#include <signal.h>
 #include <wiringPi.h>
 
 // Macros for "moving" the LED
@@ -41,19 +40,7 @@
 #define RSERVE 0
 
 
-// used to end the game
-static int gameRunning = 1;
-void intHandler(int x){// handles SIGINT to end the game
-	gameRunning = 0;
-}
-
 int main(){
-	// used to process the end of the game
-	// set up the signal handling stuff
-	struct sigaction act;
-	act.sa_handler = intHandler;
-	sigaction(SIGINT,&act,NULL);
-
 	// create button structs and set up the GPIO pins
 	button A,B;
 	A.pin = 21;
@@ -70,7 +57,7 @@ int main(){
 	int scoreL = 0; // Left score
 	int scoreR = 0; // Right score
 
-	while(gameRunning){
+	while(1){
 		// check if the LED is off the board
 		if(litLED > 7 || litLED < 0){
 			// see who failed
@@ -136,11 +123,5 @@ int main(){
 		// update the LED, delay and reduce the delay counter
 		litLED += direction;
 	}
-	// the game has ended, print the final score
-	printf("\n\nGame over.\nFinal Score:\nLeft:  %d\nRight: %d\n",scoreL,scoreR);
 
-	// shut off the LEDs
-	for(int i = 0; i < 7; ++i){
-		digitalWrite(i,LOW);
-	}
 }
