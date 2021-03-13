@@ -65,7 +65,7 @@ int main(){
 	// set up variables for lighting the LEDs
 	int direction = SERVE;
 	int state = RSERVE;
-	int litLED = 0;
+	int litLED = RSERVE;
 
 	int scoreL = 0; // Left score
 	int scoreR = 0; // Right score
@@ -77,11 +77,9 @@ int main(){
 			if(direction == LEFT){ // LED moved off the left, left player failed
 				// right player scored, let them serve again
 				printf("Right scored. Current score: Left: %d, Right: %d\n",scoreL,++scoreR);
-				litLED = 0;
 				state = RSERVE;
 			}else{ // LED moved off the right, the right player failed
 				printf("Left scored.  Current score: Left: %d, Right: %d\n",++scoreL,scoreR);
-				litLED = 7;
 				state = LSERVE;
 			}
 			// places the LED back on the board, depending on who is serving
