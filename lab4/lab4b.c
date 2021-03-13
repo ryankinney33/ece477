@@ -17,8 +17,6 @@
 	  corresponding to that edge is pressed. (Call this serving)
 	- If the LED is not moving, and the player who is not
 	  the server presses the button, nothing happens.
-	  If Ctrl+C (SIGINT) is sent to the program, the game
-	  will end and the final score will be printed.
 
 	Author: Ryan Kinney
 	ECE 477 - March 12, 2021

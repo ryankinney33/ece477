@@ -11,5 +11,3 @@ A simple, but boring, pong game using the two switches and the row of LEDs.
 - When the game starts, the LED does not move until button A is pressed, which will start the game.
 - Whenever a point is scored, the LED will be at either the leftmost or rightmost edge (depending on who scored). And will not move until the button corresponding to that edge is pressed. (Call this serve)
 - If the LED is not moving, and the player who is not the server presses the button, nothing happens.
-
-If Ctrl+C (SIGINT) is sent to the program, the game will end and the final score will be printed.
