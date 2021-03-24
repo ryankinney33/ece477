@@ -98,25 +98,25 @@ void controller_update(WiiClassic* con){
 
 // Print ALL the buttons of the struct to stdout
 void controller_print_status(WiiClassic* con){
-	printf("a = %x\n",con->a);
-	printf("b = %x\n",con->b);
-	printf("x = %x\n",con->x);
-	printf("y = %x\n",con->y);
-	printf("- = %x\n",con->minus);
-	printf("+ = %x\n",con->plus);
-	printf("h = %x\n",con->home);
-	printf("^ = %x\n",con->up);
-	printf("V = %x\n",con->down);
-	printf("< = %x\n",con->left);
-	printf("> = %x\n",con->right);
-	printf("l = %x\n",con->l);
-	printf("r = %x\n",con->r);
-	printf("zl = %x\n",con->zl);
-	printf("zr = %x\n",con->zr);
-	printf("rx = %x\n",con->rx);
-	printf("ry = %x\n",con->ry);
-	printf("lx = %x\n",con->lx);
-	printf("ly = %x\n",con->ly);
-	printf("rt = %x\n",con->rt);
-	printf("lt = %x\n",con->lt);
+	printf("a = %d\n",con->a);
+	printf("b = %d\n",con->b);
+	printf("x = %d\n",con->x);
+	printf("y = %d\n",con->y);
+	printf("- = %d\n",con->minus);
+	printf("+ = %d\n",con->plus);
+	printf("h = %d\n",con->home);
+	printf("^ = %d\n",con->up);
+	printf("V = %d\n",con->down);
+	printf("< = %d\n",con->left);
+	printf("> = %d\n",con->right);
+	printf("l = %d\n",con->l);
+	printf("r = %d\n",con->r);
+	printf("zl = %d\n",con->zl);
+	printf("zr = %d\n",con->zr);
+	printf("rx = %d\n",con->rx);
+	printf("ry = %d\n",con->ry);
+	printf("lx = %d\n",con->lx);
+	printf("ly = %d\n",con->ly);
+	printf("rt = %d\n",con->rt);
+	printf("lt = %d\n",con->lt);
 }
