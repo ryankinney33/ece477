@@ -13,6 +13,8 @@ typedef struct WiiClassic {
 	unsigned char minus,plus,home; // -,+, and home button status
 	unsigned char up,down,left,right; // D-pad button status
 
+	int fd; // the file handler returned from wiringPiI2CSetup
+
 } WiiClassic;
 
 void controller_init(WiiClassic* con); // initializes the controller

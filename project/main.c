@@ -5,16 +5,11 @@
 #include "ClassicController.h"
 
 int main() {
-	// initialize the gpio pins and setup I2C
-	int fd = wiringPiI2CSetup(DEVICE_ID);
 
-	if(fd == -1){
-		printf("Failed to initialize I2C communication.\n");
-		return 1;
-	}
+	WiiClassic con;
 
-	printf("I2C communication successfully initialized.\n");
+	controller_init(&con);
 
-	printf("%x\n",wiringPiI2CRead(fd));
+	printf("%x\n",wiringPiI2CRead(con.fd));
 	return 0;
 }
