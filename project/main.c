@@ -10,8 +10,5 @@ int main() {
 
 	controller_init(&con);
 
-	printf("\n\n");
-	controller_update(&con);
-
 	return 0;
 }

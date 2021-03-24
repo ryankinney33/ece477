@@ -5,6 +5,47 @@
 
 #include "ClassicController.h"
 
+// Macros for button masks
+// Right analog stick
+#define RX_0 0x3<<6
+#define RX_1 0x3<<6
+#define RX_2 0x1<<7
+#define RY_2 0x1F
+
+// Left analog stick
+#define LX_0 0x3F
+#define LY_1 0x3F
+
+// Right trigger
+#define RT_3 0x1F
+
+// Left trigger
+#define LT_2 0x3<<5
+#define LT_3 0x7<<5
+
+// Minus/Plus/Home buttons
+#define BM_4 1<<4
+#define BH_4     1<<3
+#define BP_4  1<<2
+
+// Trigger/Shoulder buttons
+#define BRT_4 1<<1
+#define BLT_4 1<<5
+#define BZL_5 1<<7
+#define BZR_5 1<<2
+
+// A/B/X/Y buttons
+#define BB_5 1<<6
+#define BY_5 1<<5
+#define BA_5 1<<4
+#define BX_5 1<<3
+
+// D-pad buttons
+#define BDR_4 1<<7
+#define BDD_4 1<<6
+#define BDL_5 1<<1
+#define BDU_5 1<<0
+
 // sends a byte to the specified location
 int send_byte(int fd, unsigned char data, unsigned char location){
 	// Bytes are written by first transmitting the location and then the data
@@ -27,7 +68,7 @@ void controller_init(WiiClassic* con){
 
 	// unencrypt the registers
 	// The devices are unencrypted by writing 0x55 to 0xF0 and then 0x00 to 0xFB
-	if(send_byte(con->fd, 0x55, 0xF0) == -1){
+	if(send_byte(con->fd, 0x55, 0xF0) == -1){ // check for errors
 		printf("Writing 0x55 to 0xF0 failed.\n");
 		exit(1);
 	}
@@ -52,9 +93,21 @@ void controller_update(WiiClassic* con){
 	// read the junk value
 	wiringPiI2CRead(con->fd);
 
+	// reads the 6 bytes for the button data. Stores them in an array
 	for(int i = 0; i < 6; ++i){
 		values[i] = (unsigned char)wiringPiI2CRead(con->fd);
-		// print the value in value[i]
-		printf("Byte %d = %x\n",i,values[i]);
 	}
+
+	// go through and update all the button statuses according to the array
+	
+
+
+
+
+
+
+
+
+
+
 }
