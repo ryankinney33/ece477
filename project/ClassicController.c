@@ -95,3 +95,28 @@ void controller_update(WiiClassic* con){
 	con->rx |= ((values[1]>>RX_1)&0x3)<<1; // need 1 open bit
 	con->rx |= (values[3]>>RX_2)&0x1;
 }
+
+// Print ALL the buttons of the struct to stdout
+void controller_print_status(WiiClassic* con){
+	printf("a = %x\n",con->a);
+	printf("b = %x\n",con->b);
+	printf("x = %x\n",con->x);
+	printf("y = %x\n",con->y);
+	printf("- = %x\n",con->minus);
+	printf("+ = %x\n",con->plus);
+	printf("h = %x\n",con->home);
+	printf("^ = %x\n",con->up);
+	printf("V = %x\n",con->down);
+	printf("< = %x\n",con->left);
+	printf("> = %x\n",con->right);
+	printf("l = %x\n",con->l);
+	printf("r = %x\n",con->r);
+	printf("zl = %x\n",con->zl);
+	printf("zr = %x\n",con->zr);
+	printf("rx = %x\n",con->rx);
+	printf("ry = %x\n",con->ry);
+	printf("lx = %x\n",con->lx);
+	printf("ly = %x\n",con->ly);
+	printf("rt = %x\n",con->rt);
+	printf("lt = %x\n",con->lt);
+}
