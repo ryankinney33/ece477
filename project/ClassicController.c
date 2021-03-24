@@ -4,47 +4,7 @@
 #include <wiringPiI2C.h>
 
 #include "ClassicController.h"
-
-// Macros for button masks
-// Right analog stick
-#define RX_0 6
-#define RX_1 6
-#define RX_2 7
-#define RY_2 0
-
-// Left analog stick
-#define LX_0 0
-#define LY_1 0
-
-// Right trigger
-#define RT_3 0
-
-// Left trigger
-#define LT_2 5
-#define LT_3 5
-
-// Minus/Plus/Home buttons
-#define BM_4 4
-#define BH_4 3
-#define BP_4 2
-
-// Trigger/Shoulder buttons
-#define BRT_4 1
-#define BLT_4 5
-#define BZL_5 7
-#define BZR_5 2
-
-// A/B/X/Y buttons
-#define BB_5 6
-#define BY_5 5
-#define BA_5 4
-#define BX_5 3
-
-// D-pad buttons
-#define BDR_4 7
-#define BDD_4 6
-#define BDL_5 1
-#define BDU_5 0
+#include "ClassicControllerConstants.h"
 
 // sends a byte to the specified location
 int send_byte(int fd, unsigned char data, unsigned char location){
@@ -64,7 +24,6 @@ void controller_init(WiiClassic* con){
 		printf("Failed to initialize I2C communication.\n");
 		exit(1);
 	}
-	printf("I2C communication successfully initialized.\n");
 
 	// unencrypt the registers
 	// The devices are unencrypted by writing 0x55 to 0xF0 and then 0x00 to 0xFB
@@ -99,10 +58,40 @@ void controller_update(WiiClassic* con){
 	}
 
 	// go through and update all the button statuses according to the array
-	
 
+	// start with A/B/X/Y
+	con->a = (values[5]>>BA_5)&1;
+	con->b = (values[5]>>BB_5)&1;
+	con->x = (values[5]>>BX_5)&1;
+	con->y = (values[5]>>BY_5)&1;
 
+	// next do D-pad
+	con->up = (values[5]>>BDU_5)&1;
+	con->left = (values[5]>>BDL_5)&1;
+	con->down = (values[4]>>BDD_4)&1;
+	con->right = (values[4]>>BDR_4)&1;
 
+	// Minus/plus/home
+	con->minus = (values[4]>>BM_4)&1;
+	con->plus = (values[4]>>BP_4)&1;
+	con->home = (values[4]>>BH_4)&1;
 
+	// Trigger/shoulder buttons
+	con->r = (values[4]>>BRT_4)&1;
+	con->l = (values[4]>>BLT_4)&1;
+	con->zr = (values[5]>>BZR_5)&1;
+	con->zl = (values[5]>>BZL_5)&1;
 
+	// Analog triggers next
+	con->rt = (values[3]>>RT_3)&0x1F;
+	con->lt = (values[2]&(0x3<<LT_2)) >> 2; // 2 = LT_2-3
+	con->lt |= (values[3]>>LT_3)&0x7;
+
+	// Analog joysticks next
+	con->lx = (values[0]>>LX_0)&0x3F;
+	con->ly = (values[1]>>LY_1)&0x3F;
+	con->ry = (values[2]>>RY_2)&0x1F;
+	con->rx = ((values[0]>>RX_0)&0x3)<<3; // need 3 open bits
+	con->rx |= ((values[1]>>RX_1)&0x3)<<1; // need 1 open bit
+	con->rx |= (values[3]>>RX_2)&0x1;
 }
