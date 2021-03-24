@@ -3,10 +3,14 @@
 #include <wiringPi.h>
 #include <time.h>
 
-#define SAMPLE_C 200
+#define SAMPLE_C 50
 
 // This function sets pin 0 as pull-down input
+// also sets pin 26 as digital output (for resetting the AVR)
 void gpio_init();
+
+// resets the AVR
+void AVR_reset();
 
 int main(){
 	gpio_init();
@@ -14,6 +18,9 @@ int main(){
 	// used for determining the time elapsed between two rising edges of the signal
 	clock_t timer[2]; // timer[0] is the start of the period, timer[1] is the end
 	double time[SAMPLE_C]; // the frequency is 1/time
+
+	// reset the AVR
+	AVR_reset();
 
 	for(int j = 0; j < SAMPLE_C; ++j){
 		// get the two times
@@ -40,7 +47,7 @@ int main(){
 	for(int i = 0; i < SAMPLE_C; ++i)
 		sum += time[i];
 	// the average frequency is the number of samples/sum of the times
-	printf("Frequency: %lf\n", (double)SAMPLE_C/sum);
+	printf("%lf\n", (double)SAMPLE_C/sum);
 	exit(0);
 }
 
@@ -51,4 +58,14 @@ void gpio_init(){
 	pinMode(0,INPUT);
 	pullUpDnControl(0,PUD_DOWN);
 
+	// set pin 26 as digital output
+	pinMode(26,OUTPUT);
+}
+
+// Sends a low pulse to the AVR to reset it
+void AVR_reset(){
+	digitalWrite(26, LOW);
+	delay(1);
+	digitalWrite(26, HIGH);
+	delay(1);
 }
