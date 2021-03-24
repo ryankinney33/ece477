@@ -10,6 +10,5 @@ int main() {
 
 	controller_init(&con);
 
-	printf("%x\n",wiringPiI2CRead(con.fd));
 	return 0;
 }

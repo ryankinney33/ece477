@@ -18,5 +18,6 @@ typedef struct WiiClassic {
 } WiiClassic;
 
 void controller_init(WiiClassic* con); // initializes the controller
+void controller_update(WiiClassic* con); // updates the buttons
 
 #endif
