@@ -7,11 +7,13 @@ int main() {
 	WiiClassic con;
 	controller_init(&con);
 
-	for(int i = 0; i < 10; ++i){
-		//controller_print_status(&con); // print the current status of the controller
-		printf("%d\n",con.y);
-		delay(1000); // delay 1000 ms
-		controller_update(&con); // get new input from the user
-	}
+//	while(1){
+		controller_print_status(&con); // print the current status of the controller
+		//printf("\n");
+		//printf("%d\n",con.a);
+//		delay(2000); // delay 1000 ms
+//		controller_update(&con); // get new input from the user
+//		printf("\n");
+//	}
 	return 0;
 }

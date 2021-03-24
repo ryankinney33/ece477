@@ -13,7 +13,7 @@ int send_byte(int fd, unsigned char data, unsigned char location){
 	if(x != -1){
 		x = wiringPiI2CWrite(fd, (int)data);
 	}
-	delay(1); // delays an ms
+	//	delay(1); // delays 1 ms (may not be needed)
 	return x; // x is the error status. If x is -1, then there was an error
 }
 
@@ -27,12 +27,12 @@ void controller_init(WiiClassic* con){
 
 	// unencrypt the registers
 	// The devices are unencrypted by writing 0x55 to 0xF0 and then 0x00 to 0xFB
-	if(send_byte(con->fd, 0x55, 0xF0) == -1){ // check for errors
+	if(wiringPiI2CWriteReg8(con->fd, 0xF0, 0x55) == -1){
 		printf("Writing 0x55 to 0xF0 failed.\n");
 		exit(1);
 	}
 
-	if(send_byte(con->fd, 0x00, 0xFB) == -1){
+	if(wiringPiI2CWriteReg8(con->fd,0xFB, 0x00) == -1){
 		printf("Writing 0x00 to 0xFB failed.\n");
 		exit(1);
 	}
@@ -49,13 +49,16 @@ void controller_update(WiiClassic* con){
 		printf("Failed to write 0x00\n");
 		exit(1);
 	}
-	// read the junk value
+	// read the junk value to get to required data
 	wiringPiI2CRead(con->fd);
 
 	// reads the 6 bytes for the button data. Stores them in an array
-	for(int i = 0; i < 6; ++i){
+	for(int i = 0; i < 0x6; ++i){
 		values[i] = (unsigned char)wiringPiI2CRead(con->fd);
+		printf("%x\n",values[i]);
 	}
+
+	printf("\n");
 
 	// go through and update all the button statuses according to the array
 
@@ -94,6 +97,7 @@ void controller_update(WiiClassic* con){
 	con->rx = ((values[0]>>RX_0)&0x3)<<3; // need 3 open bits
 	con->rx |= ((values[1]>>RX_1)&0x3)<<1; // need 1 open bit
 	con->rx |= (values[3]>>RX_2)&0x1;
+
 }
 
 // Print ALL the buttons of the struct to stdout
