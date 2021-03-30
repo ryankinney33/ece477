@@ -34,7 +34,7 @@ fuses:
 	sudo avrdude $(ADFLAGS) -U lfuse:w:0xe2:m -U hfuse:w:0xd7:m -U efuse:w:0xf9:m
 
 lab5a: lab5a.c
-	gcc -o lab5a lab5a.c -lwiringPi
+	gcc -o lab5a lab5a.c -lwiringPi -lm
 
 lab5b: lab5b.c
 	gcc -o lab5b lab5b.c -lwiringPi -lm
