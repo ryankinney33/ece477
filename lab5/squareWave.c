@@ -145,8 +145,11 @@ void clock_cal(void){
 		}
 
 		// update the values in EEPROM
-		eeprom_update_word((void*)0,(offD<<8)|(offS));
+		eeprom_update_byte((void*)0,offS);
 		// wait until eeprom is finished
+		eeprom_busy_wait();
+
+		eeprom_update_byte((void*)1,offD);
 		eeprom_busy_wait();
 
 		// signal to the Pi that we are done

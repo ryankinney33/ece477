@@ -6,26 +6,24 @@
 
 #define SAMPLE_C 50
 
-// This function sets pin 0 as pull-down input
+// This function initializes the GPIO pins
+// Pins 26 and 2 as outputs
+// Pins 0 and 3 as pull-down inputs
 void gpio_init();
 
-// This function measures the frequency of a square wave on pin 0
+// Resets the AVR
+void AVR_reset();
+
 double get_freq();
+
+int adjust_freq();
 
 int main(){
 	gpio_init();
 
-	// get and print info about the frequency
-	double frequency = get_freq();
-	printf("Frequency = %lf\n",frequency);
+	AVR_reset();
 
-	if(fabs(frequency-100.0) <= 0.25)
-		printf("Frequency is just about right.\n");
-	else if(frequency < 100.0)
-		printf("Frequency is too low.\n");
-	else
-		printf("Frequency is too high.\n");
-
+	while(adjust_freq());
 
 	exit(0);
 }
@@ -36,6 +34,26 @@ void gpio_init(){
 	// set pin 0 as pull-down input
 	pinMode(0,INPUT);
 	pullUpDnControl(0,PUD_DOWN);
+
+	// set pin 26 as output (for resetting the AVR)
+	pinMode(26,OUTPUT);
+	digitalWrite(26,HIGH);
+
+	// set pin 2 as output (for telling the AVR what direction the clock speed needs to move)
+	pinMode(2,OUTPUT);
+	digitalWrite(2,LOW);
+
+	// set pin 3 as pull-down input (get status from AVR)
+	pinMode(3,INPUT);
+	pullUpDnControl(3,PUD_DOWN);
+}
+
+// Resets the AVR by sending a low-pulse on pin 26
+void AVR_reset(){
+	digitalWrite(26,LOW);
+	delay(1);
+	digitalWrite(26,HIGH);
+	delay(100);
 }
 
 double get_freq(){
@@ -67,6 +85,37 @@ double get_freq(){
 	double sum = 0.0; // start by finding the sum of the times
 	for(int i = 0; i < SAMPLE_C; ++i)
 		sum += time[i];
-	// the average frequency is the number of samples/sum of the times
-	return (double)SAMPLE_C/sum;
+
+	return ((double)SAMPLE_C/sum);
+}
+
+int adjust_freq(){
+	// get and print the frequency
+	double frequency = get_freq();
+	printf("Current frequency is %lf.\n", frequency);
+
+	if(fabs(frequency-100.0) <= 0.25)
+		return 0; // frequency is close enough
+
+	// signal to the AVR we have the data
+	digitalWrite(2,HIGH);
+
+	// wait for pin 3 to go high
+	while(!digitalRead(3));
+
+	// tell the AVR which direction to move the frequency
+	if(frequency > 100.0)
+		digitalWrite(2,LOW);
+	// no need to change the pin if the frequency is too low
+
+	// wait for pin 3 to go low
+	while(digitalRead(3));
+
+	// tell the AVR we don't have any data
+	digitalWrite(2,LOW);
+
+	// reset the AVR
+	AVR_reset();
+
+	return 1; // frequency needs to get closer
 }
