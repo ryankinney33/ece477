@@ -9,18 +9,12 @@
 // also sets pin 26 as digital output (for resetting the AVR)
 void gpio_init();
 
-// resets the AVR
-void AVR_reset();
-
 int main(){
 	gpio_init();
 
 	// used for determining the time elapsed between two rising edges of the signal
 	clock_t timer[2]; // timer[0] is the start of the period, timer[1] is the end
 	double time[SAMPLE_C]; // the frequency is 1/time
-
-	// reset the AVR
-	AVR_reset();
 
 	for(int j = 0; j < SAMPLE_C; ++j){
 		// get the two times
@@ -57,15 +51,4 @@ void gpio_init(){
 	// set pin 0 as pull-down input
 	pinMode(0,INPUT);
 	pullUpDnControl(0,PUD_DOWN);
-
-	// set pin 26 as digital output
-	pinMode(26,OUTPUT);
-}
-
-// Sends a low pulse to the AVR to reset it
-void AVR_reset(){
-	digitalWrite(26, LOW);
-	delay(1);
-	digitalWrite(26, HIGH);
-	delay(1);
 }
