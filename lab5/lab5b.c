@@ -4,11 +4,19 @@
 #include <time.h>
 #include <math.h>
 
-#define SAMPLE_C 50
+// used for frequency calculations
+#define SAMPLE_C  50
+#define THRESH    0.25
+
+// pin assignments
+#define RESET    26
+#define WAVE_IN  0
+#define AVR_RDY  3
+#define AVR_DIR  2
 
 // This function initializes the GPIO pins
-// Pins 26 and 2 as outputs
-// Pins 0 and 3 as pull-down inputs
+// Pins RESET and AVR_DIR as outputs
+// Pins WAVE_IN and AVR_RDY as pull-down inputs
 void gpio_init();
 
 // Resets the AVR
@@ -31,29 +39,29 @@ int main(){
 void gpio_init(){
 	wiringPiSetup(); // set up wiring pi
 
-	// set pin 0 as pull-down input
-	pinMode(0,INPUT);
-	pullUpDnControl(0,PUD_DOWN);
+	// set pin WAVE_IN as pull-down input
+	pinMode(WAVE_IN,INPUT);
+	pullUpDnControl(WAVE_IN,PUD_DOWN);
 
-	// set pin 26 as output (for resetting the AVR)
-	pinMode(26,OUTPUT);
-	digitalWrite(26,HIGH);
+	// set pin RESET as output (for resetting the AVR)
+	pinMode(RESET,OUTPUT);
+	digitalWrite(RESET,HIGH);
 
-	// set pin 2 as output (for telling the AVR what direction the clock speed needs to move)
-	pinMode(2,OUTPUT);
-	digitalWrite(2,LOW);
+	// set pin AVR_DIR as output (for telling the AVR what direction the clock speed needs to move)
+	pinMode(AVR_DIR,OUTPUT);
+	digitalWrite(AVR_DIR,LOW);
 
-	// set pin 3 as pull-down input (get status from AVR)
-	pinMode(3,INPUT);
-	pullUpDnControl(3,PUD_DOWN);
+	// set pin AVR_RDY as pull-down input (get status from AVR)
+	pinMode(AVR_RDY,INPUT);
+	pullUpDnControl(AVR_RDY,PUD_DOWN);
 }
 
 // Resets the AVR by sending a low-pulse on pin 26
 void AVR_reset(){
-	digitalWrite(26,LOW);
+	digitalWrite(RESET,LOW);
 	delay(1);
-	digitalWrite(26,HIGH);
-	delay(100);
+	digitalWrite(RESET,HIGH);
+	delay(100); // delay 100 ms to ensure the AVR reaches a steady state before moving on
 }
 
 double get_freq(){
@@ -72,7 +80,7 @@ double get_freq(){
 			while(!riseEdge){
 				// update the current and previous states
 				previousState = currentState;
-				currentState = digitalRead(0);
+				currentState = digitalRead(WAVE_IN);
 				riseEdge = currentState && !previousState; // check for rising edge
 			}
 			timer[i] = clock(); // set the time
@@ -94,25 +102,25 @@ int adjust_freq(){
 	double frequency = get_freq();
 	printf("Current frequency is %lf.\n", frequency);
 
-	if(fabs(frequency-100.0) <= 0.25)
+	if(fabs(frequency-100.0) <= THRESH)
 		return 0; // frequency is close enough
 
 	// signal to the AVR we have the data
-	digitalWrite(2,HIGH);
+	digitalWrite(AVR_DIR,HIGH);
 
-	// wait for pin 3 to go high
-	while(!digitalRead(3));
+	// wait for the AVR_STATUS pin to go high
+	while(!digitalRead(AVR_RDY));
 
 	// tell the AVR which direction to move the frequency
 	if(frequency > 100.0)
-		digitalWrite(2,LOW);
+		digitalWrite(AVR_DIR,LOW);
 	// no need to change the pin if the frequency is too low
 
-	// wait for pin 3 to go low
-	while(digitalRead(3));
+	// wait for the AVR_STATUS pin to go low
+	while(digitalRead(AVR_RDY));
 
 	// tell the AVR we don't have any data
-	digitalWrite(2,LOW);
+	digitalWrite(AVR_DIR,LOW);
 
 	// reset the AVR
 	AVR_reset();

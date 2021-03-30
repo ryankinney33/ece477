@@ -5,8 +5,11 @@
 #include <math.h>
 
 #define SAMPLE_C 50
+#define THRESH 0.25
 
-// This function sets pin 0 as pull-down input
+#define WAVE_IN 0
+
+// This function sets pin WAVE_IN as pull-down input
 void gpio_init();
 
 // This function measures the frequency of a square wave on pin 0
@@ -19,7 +22,7 @@ int main(){
 	double frequency = get_freq();
 	printf("Frequency = %lf\n",frequency);
 
-	if(fabs(frequency-100.0) <= 0.25)
+	if(fabs(frequency-100.0) <= THRESH)
 		printf("Frequency is just about right.\n");
 	else if(frequency < 100.0)
 		printf("Frequency is too low.\n");
@@ -34,8 +37,8 @@ void gpio_init(){
 	wiringPiSetup(); // set up wiring pi
 
 	// set pin 0 as pull-down input
-	pinMode(0,INPUT);
-	pullUpDnControl(0,PUD_DOWN);
+	pinMode(WAVE_IN,INPUT);
+	pullUpDnControl(WAVE_IN,PUD_DOWN);
 }
 
 double get_freq(){
@@ -54,7 +57,7 @@ double get_freq(){
 			while(!riseEdge){
 				// update the current and previous states
 				previousState = currentState;
-				currentState = digitalRead(0);
+				currentState = digitalRead(WAVE_IN);
 				riseEdge = currentState && !previousState; // check for rising edge
 			}
 			timer[i] = clock(); // set the time
