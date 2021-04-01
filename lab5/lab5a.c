@@ -5,7 +5,7 @@
 #include <math.h>
 
 #define SAMPLE_C 50
-#define THRESH 0.3
+#define THRESH 0.5
 
 #define WAVE_IN 0
 
@@ -20,7 +20,7 @@ int main(){
 
 	// get and print info about the frequency
 	double frequency = get_freq();
-	printf("Frequency = %lf\n",frequency);
+	printf("Frequency = %lf Hz\n",frequency);
 
 	if(fabs(frequency-100.0) <= THRESH)
 		printf("Frequency is just about right.\n");

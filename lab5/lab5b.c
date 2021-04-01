@@ -4,6 +4,7 @@
 #include <time.h>
 #include <math.h>
 #include <stdint.h>
+#include <unistd.h>
 
 // used for frequency calculations
 #define SAMPLE_C  50
@@ -29,6 +30,13 @@ int adjust_freq();
 void EEPROM_set(uint8_t byte1, uint8_t byte2);
 
 int main(){
+	// Check if the user is running as root
+	// the avrdude program will fail
+	if(geteuid() != 0){
+		printf("Please run this program as root.\n");
+		exit(1);
+	}
+
 	gpio_init();
 
 	// start by setting offset to 0,0
@@ -98,22 +106,27 @@ int adjust_freq(){
 
 	// get and print the frequency
 	double frequency = get_freq();
-	printf("Current frequency is %lf.\n", frequency);
 
 	// just for initializing
 	if(previous == 0.0)
 		previous = frequency;
 
 	// return if previous is too high and frequency is too low
-	if(previous > 100.0 && frequency < 100.0)
+	if(previous > 100.0 && frequency < 100.0){
+		printf("Final frequency is %lf Hz\n", frequency);
 		return 0;
+	}
+
+	printf("Current frequency is %lf Hz, ", frequency);
+
 
 	// if the offset is zero, make the direction positive
 	if(offS == 0)
 		offD = 0;
 
 	if(frequency < 100.0){ // increase the clockspeed
-		 // increase the clock speed
+		// increase the clock speed
+		printf("increasing clock speed.\n");
 		if(offD)
 			// the current offset direction is negative, decrease the offset
 			offS--;
@@ -122,6 +135,7 @@ int adjust_freq(){
 			offS += (offS < 0xFF)? 1:0; // keep offS within 0-0xFF
 	}else{
 		// decrease the clock speed
+		printf("decreasing clock speed.\n");
 		if(offD)
 			// the current offset direction is negative, increase the offset
 			offS += (offS < 0xFF)? 1:0; // keep offS within 0-0xFF
@@ -146,8 +160,16 @@ int adjust_freq(){
 }
 
 void EEPROM_set(uint8_t byte1, uint8_t byte2){
-	static char string[100];
+	char string[90];
 	sprintf(string,"avrdude -C /home/pi/avrdude_gpio.conf -c pi_1 -p m88p -U eeprom:w:%x,%x:m 2> /dev/null",byte1,byte2);
+
+	// easy way to check if the configuration file exists
+	FILE* temp = fopen("/home/pi/avrdude_gpio.conf","r");
+	if(temp == NULL){
+		printf("Error: \"/home/pi/avrdude_gpio.conf\" does not exist.\n");
+		exit(1);
+	}
+	fclose(temp);
 
 	// flash the EEPROM with avrdude
 	system(string);
