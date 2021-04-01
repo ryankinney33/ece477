@@ -7,16 +7,16 @@
 
 CC=avr-gcc
 
-CFLAGS=-Wno-cpp -mmcu=atmega88
+CFLAGS=-Wall -mmcu=atmega88
 OBJ2HEX=avr-objcopy
 
-TARGET=squareWaveb
+TARGET=squareWave
 
 ADFLAGS=-C /home/pi/avrdude_gpio.conf -c pi_1 -p m88p
 
 .PHONY: all flash fuses eeprom clean
 
-all: lab5a lab5bb
+all: lab5a lab5b $(TARGET).obj
 
 flash: $(TARGET).hex
 	sudo avrdude $(ADFLAGS) -U flash:w:$(TARGET).hex:i
@@ -36,8 +36,8 @@ fuses:
 lab5a: lab5a.c
 	gcc -o lab5a lab5a.c -lwiringPi -lm
 
-lab5bb: lab5bb.c
-	gcc -o lab5bb lab5bb.c -lwiringPi -lm
+lab5b: lab5b.c
+	gcc -o lab5b lab5b.c -lwiringPi -lm
 
 clean:
-	rm -rf *.hex *.obj lab5a lab5bb
+	rm -rf *.hex *.obj lab5a lab5b

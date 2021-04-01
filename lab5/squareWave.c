@@ -5,7 +5,6 @@
 #include <stdint.h>
 #include <math.h>
 #include <avr/sleep.h>
-#include <util/delay.h>
 
 void init_pwm(void);
 void update_clock_speed(void);
