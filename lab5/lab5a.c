@@ -5,7 +5,7 @@
 #include <math.h>
 
 #define SAMPLE_C 50
-#define THRESH 0.25
+#define THRESH 0.3
 
 #define WAVE_IN 0
 

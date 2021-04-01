@@ -3,33 +3,36 @@
 #include <wiringPi.h>
 #include <time.h>
 #include <math.h>
+#include <stdint.h>
 
 // used for frequency calculations
 #define SAMPLE_C  50
-#define THRESH    0.25
 
 // pin assignments
 #define RESET    26
 #define WAVE_IN  0
-#define AVR_RDY  3
-#define AVR_DIR  2
 
 // This function initializes the GPIO pins
-// Pins RESET and AVR_DIR as outputs
-// Pins WAVE_IN and AVR_RDY as pull-down inputs
+// Pin RESET as digital output
+// Pin WAVE_IN as pull-down input
 void gpio_init();
 
 // Resets the AVR
 void AVR_reset();
 
+// Gets the frequency of the square wave on WAVE_IN
 double get_freq();
 
+// Calls get_freq and adjusts the EEPROM of the AVR to calibrate the clock
 int adjust_freq();
+
+void EEPROM_set(uint8_t byte1, uint8_t byte2);
 
 int main(){
 	gpio_init();
 
-	AVR_reset();
+	// start by setting offset to 0,0
+	EEPROM_set(0,0);
 
 	while(adjust_freq());
 
@@ -46,14 +49,6 @@ void gpio_init(){
 	// set pin RESET as output (for resetting the AVR)
 	pinMode(RESET,OUTPUT);
 	digitalWrite(RESET,HIGH);
-
-	// set pin AVR_DIR as output (for telling the AVR what direction the clock speed needs to move)
-	pinMode(AVR_DIR,OUTPUT);
-	digitalWrite(AVR_DIR,LOW);
-
-	// set pin AVR_RDY as pull-down input (get status from AVR)
-	pinMode(AVR_RDY,INPUT);
-	pullUpDnControl(AVR_RDY,PUD_DOWN);
 }
 
 // Resets the AVR by sending a low-pulse on pin 26
@@ -98,32 +93,64 @@ double get_freq(){
 }
 
 int adjust_freq(){
+	static uint8_t offS = 0, offD = 0;
+	static double previous = 0.0;
+
 	// get and print the frequency
 	double frequency = get_freq();
 	printf("Current frequency is %lf.\n", frequency);
 
-	if(fabs(frequency-100.0) <= THRESH)
-		return 0; // frequency is close enough
+	// just for initializing
+	if(previous == 0.0)
+		previous = frequency;
 
-	// signal to the AVR we have the data
-	digitalWrite(AVR_DIR,HIGH);
+	// return if previous is too high and frequency is too low
+	if(previous > 100.0 && frequency < 100.0)
+		return 0;
 
-	// wait for the AVR_STATUS pin to go high
-	while(!digitalRead(AVR_RDY));
+	// if the offset is zero, make the direction positive
+	if(offS == 0)
+		offD = 0;
 
-	// tell the AVR which direction to move the frequency
-	if(frequency > 100.0)
-		digitalWrite(AVR_DIR,LOW);
-	// no need to change the pin if the frequency is too low
+	if(frequency < 100.0){ // increase the clockspeed
+		 // increase the clock speed
+		if(offD)
+			// the current offset direction is negative, decrease the offset
+			offS--;
+		else
+			// offset direction is currently positive, increase the offset
+			offS += (offS < 0xFF)? 1:0; // keep offS within 0-0xFF
+	}else{
+		// decrease the clock speed
+		if(offD)
+			// the current offset direction is negative, increase the offset
+			offS += (offS < 0xFF)? 1:0; // keep offS within 0-0xFF
+		else{
+			// offset direction is positive
+			if(offS)
+				offS--; // offset is non-zero, decrease it
+			else{
+				// reverse direction and increase the offset
+				offD = 1;
+				offS++;
+			}
+		}
+	}
 
-	// wait for the AVR_STATUS pin to go low
-	while(digitalRead(AVR_RDY));
+	// finally, set the EEPROM bytes
+	EEPROM_set(offS,offD);
 
-	// tell the AVR we don't have any data
-	digitalWrite(AVR_DIR,LOW);
-
-	// reset the AVR
-	AVR_reset();
+	previous = frequency;
 
 	return 1; // frequency needs to get closer
+}
+
+void EEPROM_set(uint8_t byte1, uint8_t byte2){
+	static char string[100];
+	sprintf(string,"avrdude -C /home/pi/avrdude_gpio.conf -c pi_1 -p m88p -U eeprom:w:%x,%x:m 2> /dev/null",byte1,byte2);
+
+	// flash the EEPROM with avrdude
+	system(string);
+	delay(10); // short delay
+	AVR_reset(); // reset the AVR
 }
