@@ -31,7 +31,7 @@ void EEPROM_set(uint8_t byte1, uint8_t byte2);
 
 int main(){
 	// Check if the user is running as root
-	// the avrdude program will fail
+	// the avrdude program will fail to export GPIO pins to program without root access
 	if(geteuid() != 0){
 		printf("Please run this program as root.\n");
 		exit(1);
@@ -101,7 +101,10 @@ double get_freq(){
 }
 
 int adjust_freq(){
-	static uint8_t offS = 0, offD = 0;
+	static struct offSetNumber{ // the initial offset is 0
+		int n : 9;
+	} offset = {0};
+
 	static double previous = 0.0;
 
 	// get and print the frequency
@@ -111,48 +114,38 @@ int adjust_freq(){
 	if(previous == 0.0)
 		previous = frequency;
 
-	// return if previous is too high and frequency is too low
-	if(previous > 100.0 && frequency < 100.0){
+	// return if the 100 Hz mark is crossed
+	// this basically stops the frequency from bouncing around 100 Hz forever
+	if((previous > 100.0 && frequency < 100.0) || (previous < 100.0 && frequency > 100.0)){
 		printf("Final frequency is %lf Hz\n", frequency);
 		return 0;
 	}
 
 	printf("Current frequency is %lf Hz, ", frequency);
 
-
-	// if the offset is zero, make the direction positive
-	if(offS == 0)
-		offD = 0;
-
-	if(frequency < 100.0){ // increase the clockspeed
-		// increase the clock speed
-		printf("increasing clock speed.\n");
-		if(offD)
-			// the current offset direction is negative, decrease the offset
-			offS--;
-		else
-			// offset direction is currently positive, increase the offset
-			offS += (offS < 0xFF)? 1:0; // keep offS within 0-0xFF
+	// increase or decrease frequency (with some bounds-checkings)
+	if(frequency < 100.0){
+		offset.n++; // increase the frequency
+		if(offset.n == -256){ // check for overflow
+			offset.n = 255;
+			printf("cannot increase clock speed any further.\n");
+		}else
+			printf("increasing clock speed.\n");
 	}else{
-		// decrease the clock speed
-		printf("decreasing clock speed.\n");
-		if(offD)
-			// the current offset direction is negative, increase the offset
-			offS += (offS < 0xFF)? 1:0; // keep offS within 0-0xFF
-		else{
-			// offset direction is positive
-			if(offS)
-				offS--; // offset is non-zero, decrease it
-			else{
-				// reverse direction and increase the offset
-				offD = 1;
-				offS++;
-			}
-		}
+		offset.n--; // decrease the frequency
+		if(offset.n == -256){ // minimum offset value is -255, prevent it from going lower
+			offset.n = -255;
+			printf("cannot decrease clock speed any further.\n");
+		}else
+			printf("decreasing clock speed.\n");
 	}
 
+	// get the sign and magnitude of the offset
+	uint8_t sgn = (offset.n>>8) & 1;
+	uint8_t mag = (sgn)? -offset.n : offset.n;
+
 	// finally, set the EEPROM bytes
-	EEPROM_set(offS,offD);
+	EEPROM_set(mag,sgn);
 
 	previous = frequency;
 
@@ -160,8 +153,8 @@ int adjust_freq(){
 }
 
 void EEPROM_set(uint8_t byte1, uint8_t byte2){
-	char string[90];
-	sprintf(string,"avrdude -C /home/pi/avrdude_gpio.conf -c pi_1 -p m88p -U eeprom:w:%x,%x:m 2> /dev/null",byte1,byte2);
+	char avrcommand[90];
+	sprintf(avrcommand,"avrdude -C /home/pi/avrdude_gpio.conf -c pi_1 -p m88p -U eeprom:w:%x,%x:m 2> /dev/null",byte1,byte2);
 
 	// easy way to check if the configuration file exists
 	FILE* temp = fopen("/home/pi/avrdude_gpio.conf","r");
@@ -172,7 +165,7 @@ void EEPROM_set(uint8_t byte1, uint8_t byte2){
 	fclose(temp);
 
 	// flash the EEPROM with avrdude
-	system(string);
+	system(avrcommand);
 	delay(10); // short delay
 	AVR_reset(); // reset the AVR
 }
