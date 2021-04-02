@@ -1,8 +1,19 @@
+/*
+	The purpose of this program is to measure the frequency
+	of a 100 Hz square wave on pin 0. The program will print whether
+	or not the frequency is too low or too high (or if it's in the
+	range dictated by 100 +/ THRESH.
+
+	Author: Ryan Kinney
+	ECE 477 - Spring 2021
+	April 1 - 2021
+*/
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <wiringPi.h>
-#include <time.h>
 #include <math.h>
+#include <time.h>
 
 #define SAMPLE_C 50
 #define THRESH 0.5
@@ -15,6 +26,8 @@ void gpio_init();
 // This function measures the frequency of a square wave on pin 0
 double get_freq();
 
+// Calls the other functions to initialize GPIO pins
+// and measure square wave on pin 0
 int main(){
 	gpio_init();
 

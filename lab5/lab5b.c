@@ -1,8 +1,39 @@
+/*
+	The pusrpose of this program is to do something cool
+	and related to part A. Part A was about measuring a
+	100 Hz square wave on pin 0. The source of the square
+	wave is an ATMEGA88PA and the reason for these programs
+	is to calibrate its internal RC oscillator.
+
+	What this program does is measure the frequency of the wave,
+	and adjust the offset value stored in the AVR's EEPROM to
+	increase or decrease the frequency. This program does not know
+	what the initial offset is, so at program run-time, the offset
+	value is set to 0 before the measurement and calibration begins.
+
+	To calibrate, the following is done in a loop.
+	  1. Read the frequency
+	  2. Increase/Decrease the offset
+	  3. Flash the offset into the EEPROM
+	  4. Reset the AVR
+	The program ends when the frequency crosses 100 Hz (either
+	goes from less than 100Hz to more than or vice-versa)
+
+	This program calls avrdude to flash the two EEPROM bytes.
+	The config file used is /home/pi/avrdude_gpio.conf and the
+	programmer used is the one using the Pi's GPIO pins. A shortcoming
+	of this is that requires root access to export/unexport the GPIO
+	pins, so this program must be run with root access (e.g sudo ./lab5b)
+
+	Author: Ryan Kinney
+	Ece 477 - Spring 2021
+	April 2, 2021
+*/
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <wiringPi.h>
 #include <time.h>
-#include <math.h>
 #include <stdint.h>
 #include <unistd.h>
 
@@ -29,11 +60,12 @@ int adjust_freq();
 
 void EEPROM_set(uint8_t byte1, uint8_t byte2);
 
-int main(){
+int main(int argc, char* argv[]){
 	// Check if the user is running as root
 	// the avrdude program will fail to export GPIO pins to program without root access
 	if(geteuid() != 0){
 		printf("Please run this program as root.\n");
+		printf("For example: sudo %s\n",argv[0]);
 		exit(1);
 	}
 

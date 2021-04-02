@@ -37,7 +37,7 @@ lab5a: lab5a.c
 	gcc -o lab5a lab5a.c -lwiringPi -lm
 
 lab5b: lab5b.c
-	gcc -o lab5b lab5b.c -lwiringPi -lm
+	gcc -o lab5b lab5b.c -lwiringPi
 
 clean:
 	rm -rf *.hex *.obj lab5a lab5b
