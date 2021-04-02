@@ -1,5 +1,5 @@
 /*
-	The pusrpose of this program is to do something cool
+	The purpose of this program is to do something cool
 	and related to part A. Part A was about measuring a
 	100 Hz square wave on pin 0. The source of the square
 	wave is an ATMEGA88PA and the reason for these programs
