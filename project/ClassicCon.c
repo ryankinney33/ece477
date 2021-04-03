@@ -3,19 +3,8 @@
 #include <wiringPi.h>
 #include <wiringPiI2C.h>
 
-#include "ClassicController.h"
-#include "ClassicControllerConstants.h"
-
-// sends a byte to the specified location
-int send_byte(int fd, unsigned char data, unsigned char location){
-	// Bytes are written by first transmitting the location and then the data
-	int x = wiringPiI2CWrite(fd, (int)location);
-	if(x != -1){
-		x = wiringPiI2CWrite(fd, (int)data);
-	}
-	//	delay(1); // delays 1 ms (may not be needed)
-	return x; // x is the error status. If x is -1, then there was an error
-}
+#include "ClassicCon.h"
+#include "CCCons.h"
 
 // Initializes the controller
 void controller_init(WiiClassic* con){
@@ -54,11 +43,11 @@ void controller_update(WiiClassic* con){
 
 	// reads the 6 bytes for the button data. Stores them in an array
 	for(int i = 0; i < 0x6; ++i){
-		values[i] = (unsigned char)wiringPiI2CRead(con->fd);
-		printf("%x\n",values[i]);
+		values[i] = (unsigned int)wiringPiI2CRead(con->fd);
+		//printf("%x\n",values[i]); // used for debugging purposes
 	}
 
-	printf("\n");
+	//printf("\n"); // used for debugging
 
 	// go through and update all the button statuses according to the array
 
