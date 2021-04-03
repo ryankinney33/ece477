@@ -4,14 +4,19 @@
 
 int main() {
 	// make and initialize the controller struct
-	WiiClassic con;
-	controller_init(&con);
+	WiiClassic con, prev;
+	con_init(&con);
 
-//	while(1){
-		controller_print_status(&con); // print the current status of the controller
-//		delay(2000); // delay 2000 ms
-//		controller_update(&con); // get new input from the user
-//		printf("\n");
-//	}
+	prev = con;
+
+	while(con_update(&con) != -1){
+		//con_dump_buttons(&con); // print the current status of the controller
+//		if(con_update(&con)== -1) // get new button data
+//			con_init(&con);
+		delay(32);
+		con_print_dig_status(&con,&prev);
+		prev = con;
+		printf("\n");
+	}
 	return 0;
 }
