@@ -4,15 +4,15 @@
 #define DEVICE_ID 0x52
 
 typedef struct WiiClassic {
-	unsigned char rx, ry; // Right joystick coordinates
-	unsigned char lx, ly; // Left joystick coordinates
+	unsigned char rx:5, ry:5; // Right joystick coordinates
+	unsigned char lx:6, ly:6; // Left joystick coordinates
 
-	unsigned char rt, lt; // analog buttons of LT and RT
+	unsigned char rt:5, lt:5; // analog buttons of LT and RT
 
-	unsigned char a,b,x,y; // A, B, X, Y button status
-	unsigned char minus,plus,home; // -,+, and home button status
-	unsigned char up,down,left,right; // D-pad button status
-	unsigned char zl,zr,l,r; // digital shoulder buttons
+	unsigned char a:1,b:1,x:1,y:1; // A, B, X, Y button status
+	unsigned char minus:1,plus:1,home:1; // -,+, and home button status
+	unsigned char up:1,down:1,left:1,right:1; // D-pad button status
+	unsigned char zl:1,zr:1,l:1,r:1; // digital shoulder buttons
 
 	int fd; // the file handler returned from wiringPiI2CSetup
 
