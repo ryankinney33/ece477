@@ -10,9 +10,14 @@
 #include <avr/sleep.h>
 
 void update_clock_speed(void);
+
 void USART0_init(void);
 int USART0_Transmit(char byte, FILE* stream);
 int USART0_Receive(FILE* stream);
+
+void init_ADC(void);
+
+int get_ADC(void);
 
 // used for using stdin and stdout with USART
 FILE usart0_str = FDEV_SETUP_STREAM(USART0_Transmit, USART0_Receive, _FDEV_SETUP_RW);
@@ -20,8 +25,9 @@ FILE usart0_str = FDEV_SETUP_STREAM(USART0_Transmit, USART0_Receive, _FDEV_SETUP
 int main(){
 	update_clock_speed(); // adjust OSCCAL
 	USART0_init(); // initialize USART0
-	stdin = stdout = &usart0_str;
+	stdin = stdout = &usart0_str; // setup stdin and stdout streams
 
+	init_ADC(); // initialize ADC0
 
 	while(1); // busy loop
 }
@@ -80,4 +86,22 @@ int USART0_Receive(FILE* stream){
 
 	return UDR0; // return the data from the buffer
 
+}
+
+void init_ADC(void){
+	// Select AVCC as reference
+	// Connect ADC0 to the ADC
+	// Right-adjust the ADC data
+	ADMUX = (1<<REFS0);
+
+	// enable the ADC and set the prescaler
+	// choose the prescaler so that the clock is between 75KHz and 225KHz
+	ADCSRA = (1<<ADEN)|(3<<ADPS1); // 64 is chosen, 8MHz/64 = 125kHz
+	
+	// start the ADC
+	ADCRSA |= (1<<ADSC);
+}
+
+int get_ADC(void){
+	
 }
