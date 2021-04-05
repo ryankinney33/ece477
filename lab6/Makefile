@@ -16,7 +16,7 @@ ADFLAGS=-C /home/pi/avrdude_gpio.conf -c pi_1 -p m88p
 
 .PHONY: all flash fuses eeprom clean
 
-all: lab5a lab5b $(TARGET).obj
+all: $(TARGET).obj
 
 flash: $(TARGET).hex
 	sudo avrdude $(ADFLAGS) -U flash:w:$(TARGET).hex:i

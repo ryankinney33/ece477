@@ -1,3 +1,6 @@
+#define F_CPU 8000000UL // 8 MHz oscillator
+#define BAUD 9600UL // 9600 baud rate for USART
+
 #include <avr/io.h>
 #include <avr/interrupt.h>
 #include <avr/eeprom.h>
@@ -6,11 +9,13 @@
 #include <math.h>
 #include <avr/sleep.h>
 
+
 void update_clock_speed(void);
+void init_usart(void);
 
 int main(){
-	update_clock_speed() // adjust OSCCAL
-
+	update_clock_speed(); // adjust OSCCAL
+	init_usart(); // initialize USART0
 
 
 	while(1); // busy loop
@@ -31,4 +36,19 @@ void update_clock_speed(void){
 			if(temp != 0xff) OSCCAL -= temp;
 		}
 	}
+}
+
+void init_usart(void){
+	// ubrr value = fosc/(16*baud rate) - 1
+	uint16_t UBRRn = F_CPU/(BAUD<<4)-1; // should be about 51
+
+	// Set the baud rate
+	UBRR0H = (uint8_t)(UBRRn>>8);
+	UBRR0L = (uint8_t)(UBRRn);
+
+	// Enable the receiver and transmitter
+	UCSR0B = (1<<RXEN0)|(1<<TXEN0);
+
+	// Set the frame format: 8 data bits, 2 stop bits
+	UCSR0C = (1<<USBS0)|(3<<UCSZ00);
 }
