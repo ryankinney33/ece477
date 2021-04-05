@@ -1,4 +1,6 @@
 #include <stdio.h>
+#include <unistd.h>
+#include <stdlib.h>
 #include <wiringPi.h>
 #include "ClassicCon.h"
 
@@ -9,14 +11,13 @@ int main() {
 
 	prev = con;
 
-	while(con_update(&con) != -1){
+	while(1){
 		//con_dump_buttons(&con); // print the current status of the controller
-//		if(con_update(&con)== -1) // get new button data
-//			con_init(&con);
-		delay(32);
+		con_update(&con); // get new button data
 		con_print_dig_status(&con,&prev);
 		prev = con;
-		printf("\n");
+
+		//printf("\n");
 	}
 	return 0;
 }

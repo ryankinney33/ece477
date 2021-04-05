@@ -11,8 +11,6 @@ Outside of the program mentioned previously, values will be written to the EEPRO
 the oscillator to get the frequency as close to 100Hz as possible.
 
 ## Part B
-For this part of the lab, the AVR sample code was modified to include a function that will accept a digital input
-that tells whether or not the frequency is too high or too low. The value in the EEPROM will then be adjusted accordingly.
-The program on the Pi will be adapted to send a digital signal to the AVR to tell it which direction to change
-the frequency. Basically, the program will (in a loop until the frequency is close enough to 100Hz) measure the
-frequency, set a pin high/low to tell the AVR which direction to change the frequency, and reset the AVR.
+For this part of the lab, the Raspberry Pi program has been modified to call avrdude to change the offset
+stored in the EEPROM of the AVR to calibrate the clock. It calculates the frequency like in part A, adjusts the offset,
+flashes the EEPROM, and resets the AVR. This is repeated until the measured frequency crosses 100Hz.
