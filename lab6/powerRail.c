@@ -9,13 +9,14 @@
 #include <math.h>
 #include <avr/sleep.h>
 
-
 void update_clock_speed(void);
-void init_usart(void);
+void USART0_init(void);
+void USART0_Transmit(uint8_t byte);
+uint8_t USART0_Receive(void);
 
 int main(){
 	update_clock_speed(); // adjust OSCCAL
-	init_usart(); // initialize USART0
+	USART0_init(); // initialize USART0
 
 
 	while(1); // busy loop
@@ -38,7 +39,7 @@ void update_clock_speed(void){
 	}
 }
 
-void init_usart(void){
+void USART0_init(void){
 	// ubrr value = fosc/(16*baud rate) - 1
 	uint16_t UBRRn = F_CPU/(BAUD<<4)-1; // should be about 51
 
@@ -51,4 +52,20 @@ void init_usart(void){
 
 	// Set the frame format: 8 data bits, 2 stop bits
 	UCSR0C = (1<<USBS0)|(3<<UCSZ00);
+}
+
+void USART0_Transmit(uint8_t byte){
+	// wait for the transmit buffer to empty
+	while(!(UCSR0A&(1<<UDRE0)));
+
+	// put the data into the buffer, sending it
+	UDR0 = byte;
+}
+
+uint8_t USART0_Receive(void){
+	// wait for data to be recevied
+	while(!(UCSR0A&(1<<RXC0)));
+
+	return UDR0; // return the data from the buffer
+
 }
