@@ -7,7 +7,7 @@
 
 CC=avr-gcc
 
-CFLAGS=-Wall -mmcu=atmega88
+CFLAGS=-Wall -mmcu=atmega88 -u vfprintf -lprintf_flt -lm
 OBJ2HEX=avr-objcopy
 
 TARGET=powerRail
