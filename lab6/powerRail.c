@@ -95,13 +95,23 @@ void init_ADC(void){
 	ADMUX = (1<<REFS0);
 
 	// enable the ADC and set the prescaler
-	// choose the prescaler so that the clock is between 75KHz and 225KHz
+	// choose the prescaler so that the clock is between 50KHz and 200KHz
 	ADCSRA = (1<<ADEN)|(3<<ADPS1); // 64 is chosen, 8MHz/64 = 125kHz
-	
-	// start the ADC
-	ADCRSA |= (1<<ADSC);
 }
 
 int get_ADC(void){
-	
+	// start the ADC conversion
+	ADCSRA |= (1<<ADSC);
+
+	// wait for the ADC conversion to complete
+	while(!(ADCSRA&(1<<ADIF)));
+
+	// get the values
+	int value = ADCH<<8;
+	value |= ADCL;
+
+	// clear the ADIF flag
+	ADCSRA |= (1<<ADIF);
+
+	return value;
 }
