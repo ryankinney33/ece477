@@ -38,12 +38,12 @@ int main(){
 	signal(SIGINT, intHandle);
 
 	// first, initialize the reset line
-	gpio_init();
+//	gpio_init();
 
 	// initialize the serial port
 	int serial = init_serial();
-	AVR_reset();
-	delay(1300); // wait a bit for the AVR to do its thing
+//	AVR_reset();
+//	delay(1300); // wait a bit for the AVR to do its thing
 
 	// opens/creates a file for writing data
 	FILE* data = fopen("rail_voltages.dat","w");
@@ -54,14 +54,25 @@ int main(){
 	}
 
 	// initialization is done; start doing stuff
-	start(serial);
+//	start(serial);
+//	char c;
+	char buf[100];
+//	read(serial,buf,100);
+//	printf("%s",buf);
+
+//	scanf("%s",buf);
+//	write(serial,buf,strlen(buf));
 
 	while(keepRunning){
 		get_data(serial,data);
+//		scanf("%s",buf);
+//		write(serial,buf,strlen(buf));
+//		if(read(serial,buf,100) > 0)
+//			printf("%s",buf);
 	}
 
 	// done; close the files
-	fclose(data);
+//	fclose(data);
 	close(serial);
 	printf("\n");
 	exit(0);
@@ -99,13 +110,14 @@ int init_serial(){
 		exit(1);
 	}
 
-	tty.c_cflag = CS8 | CREAD | CLOCAL | CSTOPB; // 8 bit chars, enable receiver, no modem status lines
+	tty.c_cflag = CS8 | CREAD | CLOCAL | CSTOPB; // 8 data bits, 2 stop bits enable receiver, no modem status lines
+
 	tty.c_iflag = IGNPAR; // ignore parity errors
 	tty.c_oflag = 0; // disable all these flags
-	tty.c_lflag = 0; // disable all these flags
+	tty.c_lflag = 0; // canonical processing
 
-	tty.c_cc[VTIME] = 50; // wait 5 seconds (50 deciseconds)
-	tty.c_cc[VMIN] = 42; // wait for 42 characters from serial
+//	tty.c_cc[VTIME] = 5; // wait 0.5 seconds
+//	tty.c_cc[VMIN] = 0; // read doesnt block
 
 	// set the baud rate
 	cfsetispeed(&tty, BAUDRATE);
@@ -144,7 +156,7 @@ float extract_number(char* buf){
 
 void start(int serial_port){
 	// buffer
-	char buf[256] = "Please type \"START\" (no quotes) to start.\n";
+	char buf[100] = "Please type \"START\" (no quotes) to start.\n";
 	printf("%s",buf);
 	do{
 		scanf("%s",buf); // get input from stdin
@@ -159,10 +171,10 @@ void start(int serial_port){
 
 
 void get_data(int serial_port, FILE* file){
-	static char* buf = "\0"; // input buffer
+	static char buf[100] = "\0"; // input buffer
 
 	// read the data from the serial port
-	int x = read(serial_port,&buf,sizeof(buf));
+	int x = read(serial_port,buf,sizeof(buf));
 	if(x == -1){ // check for error
 		fprintf(stderr, "Error %i from read: %s\n", errno, strerror(errno));
 		keepRunning = 0; // exit program on error
@@ -170,6 +182,5 @@ void get_data(int serial_port, FILE* file){
 	else if(x){ // check if anything was actually read
 		printf("%s",buf); // print what was received from the AVR to stdout
 		fprintf(file,"%lf\n",extract_number(buf)); // save the number in rail_voltage.dat
-		sleep(1);
 	}
 }
