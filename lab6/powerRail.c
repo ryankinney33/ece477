@@ -35,7 +35,7 @@ int main(){
 	_delay_ms(1000); // let serial do its thing
 
 	// wait to receive "START" on USART0
-	while(strcmp("START",buf)){
+	while(strncmp("START",buf,strlen(buf))){
 		scanf("%s",buf);
 	}
 

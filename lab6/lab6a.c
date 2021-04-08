@@ -22,8 +22,7 @@ int gpio_init();
 int AVR_reset();
 int init_serial();
 
-float extract_number(char* buf);
-void start(int serial_port);
+void start();
 void get_data(int serial_port, FILE* file);
 
 static volatile int keepRunning = 1;
@@ -38,12 +37,12 @@ int main(){
 	signal(SIGINT, intHandle);
 
 	// first, initialize the reset line
-//	gpio_init();
+	gpio_init();
 
+	AVR_reset(); // reset the AVR
+	delay(1300); // sleep for 1.3 seconds (give the AVR some time)
 	// initialize the serial port
 	int serial = init_serial();
-//	AVR_reset();
-//	delay(1300); // wait a bit for the AVR to do its thing
 
 	// opens/creates a file for writing data
 	FILE* data = fopen("rail_voltages.dat","w");
@@ -54,25 +53,16 @@ int main(){
 	}
 
 	// initialization is done; start doing stuff
-//	start(serial);
-//	char c;
+	start(serial);
 	char buf[100];
-//	read(serial,buf,100);
-//	printf("%s",buf);
-
-//	scanf("%s",buf);
-//	write(serial,buf,strlen(buf));
 
 	while(keepRunning){
 		get_data(serial,data);
-//		scanf("%s",buf);
-//		write(serial,buf,strlen(buf));
-//		if(read(serial,buf,100) > 0)
-//			printf("%s",buf);
 	}
 
-	// done; close the files
-//	fclose(data);
+	// done; close the files and reset the AVR
+	AVR_reset();
+	fclose(data);
 	close(serial);
 	printf("\n");
 	exit(0);
@@ -106,7 +96,6 @@ int init_serial(){
 	struct termios tty;
 	if(tcgetattr(port, &tty) != 0){ // error checking
 		fprintf(stderr, "Error %i from tcgettattr: %s\n", errno, strerror(errno));
-		close(port);
 		exit(1);
 	}
 
@@ -116,9 +105,6 @@ int init_serial(){
 	tty.c_oflag = 0; // disable all these flags
 	tty.c_lflag = 0; // canonical processing
 
-//	tty.c_cc[VTIME] = 5; // wait 0.5 seconds
-//	tty.c_cc[VMIN] = 0; // read doesnt block
-
 	// set the baud rate
 	cfsetispeed(&tty, BAUDRATE);
 	cfsetospeed(&tty, BAUDRATE);
@@ -126,46 +112,25 @@ int init_serial(){
 	// set the attributes and check for error
 	if(tcsetattr(port, TCSANOW, &tty) != 0){
 		fprintf(stderr, "Error %i from tcsetattr: %s\n", errno, strerror(errno));
-		close(port);
 		exit(1);
 	}
 
 	return port; // return the file descriptor for the port
 }
 
-float extract_number(char* buf){
-	static const char delim[7] = " \t\r\n\v\f"; // whitespace characters
-	char* token;
-	char* ptr;
-
-	// get the first token
-	token = strtok(buf,delim);
-
-	// go through all the tokens
-	while(token != NULL){
-		// check if the current token is a number
-		if(isdigit(token[0])){
-			return strtof(token,&ptr);
-		}
-
-		// get next token
-		token = strtok(NULL,delim);
-	}
-	return nanf(""); // returns NaN if no number was found
-}
-
-void start(int serial_port){
+void start(){
 	// buffer
 	char buf[100] = "Please type \"START\" (no quotes) to start.\n";
+	char cmd[256];
 	printf("%s",buf);
 	do{
 		scanf("%s",buf); // get input from stdin
-		if(write(serial_port, buf, strlen(buf)) == -1){ // send the input to the AVR, check for errors
-			fprintf(stderr, "Error %i from write: %s\n", errno, strerror(errno));
-			close(serial_port);
+		sprintf(cmd,"echo -e \"%s\" > %s",buf,DEVICE);
+		if(system(cmd) == -1){ // send the input to the AVR, check for errors
+			fprintf(stderr, "Error %i during write: %s\n", errno, strerror(errno));
 			exit(1);
 		}
-	}while(strcmp(buf,"START")); // stop getting input once "START" is sent
+	}while(strncmp(buf,"START",strlen(buf))); // stop getting input once "START" is sent
 }
 
 
