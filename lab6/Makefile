@@ -7,7 +7,7 @@
 
 CC=avr-gcc
 
-CFLAGS=-Wall -mmcu=atmega88 -u vfprintf -lprintf_flt -lm
+CFLAGS=-Wall -mmcu=atmega88 -u vfprintf -lprintf_flt -lm -Os
 OBJ2HEX=avr-objcopy
 
 TARGET=powerRail
@@ -16,7 +16,7 @@ ADFLAGS=-C /home/pi/avrdude_gpio.conf -c pi_1 -p m88p
 
 .PHONY: all flash fuses eeprom clean
 
-all: $(TARGET).obj
+all: $(TARGET).obj lab6a
 
 flash: $(TARGET).hex
 	sudo avrdude $(ADFLAGS) -U flash:w:$(TARGET).hex:i
