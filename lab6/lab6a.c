@@ -1,11 +1,17 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
+#include <string.h>
+#include <ctype.h>
+
 #include <termios.h>
 #include <fcntl.h>
-#include <wiringPi.h>
-#include <string.h>
 #include <unistd.h>
 #include <errno.h>
+#include <signal.h>
+
+#include <wiringPi.h>
+
 
 #define RESET 26
 
@@ -14,15 +20,50 @@
 
 int gpio_init();
 int AVR_reset();
-
 int init_serial();
+//void get_data(char* buf, FILE* file
+float extract_number(char* buf);
+
+static volatile int keepRunning = 1;
+
+// handles SIGINT to exit the program gracefully
+void intHandle(int x){
+	keepRunning = 0;
+}
 
 int main(){
+	// used for gracefully exiting the program
+	signal(SIGINT, intHandle);
+
 	// first, initialize the reset line
 	gpio_init();
 
-	char buf[100];
+	// initialize the serial port
+	int serial = init_serial();
+	AVR_reset();
+	delay(1300); // wait a bit for the AVR to do its thing
 
+	// opens/creates a file for writing data
+	FILE* data = fopen("rail_voltages.dat","w");
+
+	// buffer
+	char buf[256] = "\0";
+	do{
+		scanf("%s",buf); // get input from stdin
+		write(serial, buf, strlen(buf)); // send the input to the AVR
+	}while(strcmp(buf,"START")); // stop getting input once "START" is sent
+
+	while(keepRunning){
+		sprintf(buf,"testing testing 123.4567\n");
+		printf("%s",buf);
+		fprintf(data,"%lf\n",extract_number(buf));
+		sleep(1);
+	}
+
+	// done; close the files
+	fclose(data);
+	close(serial);
+	printf("\n");
 	exit(0);
 }
 
@@ -73,4 +114,27 @@ int init_serial(){
 	if(tcsetattr(port, TCSANOW, &tty) != 0){
 		fprintf(stderr, "Error %i from tcsetattr: %s\n", errno, strerror(errno));
 	}
+
+	return port; // return the file descriptor for the port
+}
+
+float extract_number(char* buf){
+	static const char delim[7] = " \t\r\n\v\f"; // whitespace characters
+	char* token;
+	char* ptr;
+
+	// get the first token
+	token = strtok(buf,delim);
+
+	// go through all the tokens
+	while(token != NULL){
+		// check if the current token is a number
+		if(isdigit(token[0])){
+			return strtof(token,&ptr);
+		}
+
+		// get next token
+		token = strtok(NULL,delim);
+	}
+	return nanf(""); // returns NaN if no number was found
 }
