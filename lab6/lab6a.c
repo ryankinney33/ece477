@@ -181,6 +181,13 @@ void get_data(int serial_port, FILE* file){
 	}
 	else if(x){ // check if anything was actually read
 		printf("%s",buf); // print what was received from the AVR to stdout
-		fprintf(file,"%lf\n",extract_number(buf)); // save the number in rail_voltage.dat
+		// iterate through the buffer, writing numbers, periods, and newlines
+		for(int i = 0; i < strlen(buf); ++i){
+			if(isdigit(buf[i]) || buf[i] == '.'){
+				fputc(buf[i],file);
+			}else if(buf[i] == 'V'){
+				fputc('\n',file);
+			}
+		}
 	}
 }
