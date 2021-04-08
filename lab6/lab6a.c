@@ -21,8 +21,10 @@
 int gpio_init();
 int AVR_reset();
 int init_serial();
-//void get_data(char* buf, FILE* file
+
 float extract_number(char* buf);
+void start(int serial_port);
+void get_data(int serial_port, FILE* file);
 
 static volatile int keepRunning = 1;
 
@@ -45,19 +47,17 @@ int main(){
 
 	// opens/creates a file for writing data
 	FILE* data = fopen("rail_voltages.dat","w");
+	if(data == NULL){
+		fprintf(stderr, "Error %i from fopen: %s\n", errno, strerror(errno));
+		close(serial);
+		exit(1);
+	}
 
-	// buffer
-	char buf[256] = "\0";
-	do{
-		scanf("%s",buf); // get input from stdin
-		write(serial, buf, strlen(buf)); // send the input to the AVR
-	}while(strcmp(buf,"START")); // stop getting input once "START" is sent
+	// initialization is done; start doing stuff
+	start(serial);
 
 	while(keepRunning){
-		sprintf(buf,"testing testing 123.4567\n");
-		printf("%s",buf);
-		fprintf(data,"%lf\n",extract_number(buf));
-		sleep(1);
+		get_data(serial,data);
 	}
 
 	// done; close the files
@@ -95,6 +95,7 @@ int init_serial(){
 	struct termios tty;
 	if(tcgetattr(port, &tty) != 0){ // error checking
 		fprintf(stderr, "Error %i from tcgettattr: %s\n", errno, strerror(errno));
+		close(port);
 		exit(1);
 	}
 
@@ -113,6 +114,8 @@ int init_serial(){
 	// set the attributes and check for error
 	if(tcsetattr(port, TCSANOW, &tty) != 0){
 		fprintf(stderr, "Error %i from tcsetattr: %s\n", errno, strerror(errno));
+		close(port);
+		exit(1);
 	}
 
 	return port; // return the file descriptor for the port
@@ -137,4 +140,36 @@ float extract_number(char* buf){
 		token = strtok(NULL,delim);
 	}
 	return nanf(""); // returns NaN if no number was found
+}
+
+void start(int serial_port){
+	// buffer
+	char buf[256] = "Please type \"START\" (no quotes) to start.\n";
+	printf("%s",buf);
+	do{
+		scanf("%s",buf); // get input from stdin
+		if(write(serial_port, buf, strlen(buf)) == -1){ // send the input to the AVR, check for errors
+			fprintf(stderr, "Error %i from write: %s\n", errno, strerror(errno));
+			close(serial_port);
+			exit(1);
+		}
+	}while(strcmp(buf,"START")); // stop getting input once "START" is sent
+}
+
+
+
+void get_data(int serial_port, FILE* file){
+	static char* buf = "\0"; // input buffer
+
+	// read the data from the serial port
+	int x = read(serial_port,&buf,sizeof(buf));
+	if(x == -1){ // check for error
+		fprintf(stderr, "Error %i from read: %s\n", errno, strerror(errno));
+		keepRunning = 0; // exit program on error
+	}
+	else if(x){ // check if anything was actually read
+		printf("%s",buf); // print what was received from the AVR to stdout
+		fprintf(file,"%lf\n",extract_number(buf)); // save the number in rail_voltage.dat
+		sleep(1);
+	}
 }
