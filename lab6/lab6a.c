@@ -140,7 +140,7 @@ void get_data(int serial_port, FILE* file){
 		fprintf(stderr, "Error %i from read: %s\n", errno, strerror(errno));
 		keepRunning = 0; // exit program on error
 	}
-	else if(x){ // check if anything was actually read
+	else if(x && keepRunning){ // check if anything was actually read
 		printf("%s",buf); // print what was received from the AVR to stdout
 		// iterate through the buffer, writing numbers, periods, and newlines
 		for(int i = 0; i < strlen(buf); ++i){
