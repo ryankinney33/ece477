@@ -86,7 +86,7 @@ int AVR_reset(){
 
 int init_serial(){
 	// open the serial port and check for errors
-	int port = open(DEVICE, O_RDWR);
+	int port = open(DEVICE, O_RDWR | O_NOCTTY);
 	if(port < 0){
 		fprintf(stderr, "Error %i from open: %s\n", errno, strerror(errno));
 		exit(1);

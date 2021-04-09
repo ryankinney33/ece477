@@ -7,7 +7,6 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <errno.h>
-#include <signal.h>
 
 #include <wiringPi.h>
 
@@ -22,21 +21,7 @@ int init_serial();
 
 void read_write(int src, int dst);
 
-static pid_t pid; // global for use in intHandle
-static volatile int keepRunning = 1;
-
-// handles SIGINT to exit the program gracefully
-void intHandle(int x){
-	keepRunning = 0;
-	if(!pid){ // child process
-		_exit(0);
-	}
-}
-
-
 int main(int argc, char* argv[]){
-	// used for gracefully exiting the program
-	signal(SIGINT, intHandle);
 	int src, dst;
 
 	// first, initialize the reset line
@@ -46,6 +31,7 @@ int main(int argc, char* argv[]){
 	// initialize the serial port
 	int serial = init_serial();
 
+	pid_t pid;
 	if(!(pid = fork())){
 		// child process, read from stdin, write to serial
 		src = 0;
@@ -63,15 +49,10 @@ int main(int argc, char* argv[]){
 	}
 
 	// initialization is done; start doing stuff
-	while(keepRunning){
+	while(1){
 		read_write(src,dst);
 	}
-	wait(NULL); // wait for child to finish
 
-	// done; close port and reset the AVR
-	AVR_reset();
-	close(serial);
-	printf("\n");
 	exit(0);
 }
 
@@ -93,7 +74,7 @@ int AVR_reset(){
 
 int init_serial(){
 	// open the serial port and check for errors
-	int port = open(DEVICE, O_RDWR);
+	int port = open(DEVICE, O_RDWR | O_NOCTTY);
 	if(port < 0){
 		fprintf(stderr, "Error %i from open: %s\n", errno, strerror(errno));
 		exit(1);
@@ -125,6 +106,7 @@ int init_serial(){
 	return port; // return the file descriptor for the port
 }
 
+// reads a character from src, and writes it to dst
 void read_write(int src, int dst){
 	char c; // character for reading and writing
 	int x = read(src,&c,1); // read from src
@@ -132,8 +114,8 @@ void read_write(int src, int dst){
 		fprintf(stderr, "Error %i from read: %s\n", errno, strerror(errno));
 		exit(1);
 	}
-	else if(x && keepRunning){
-		if(write(dst,&c,1) == -1){
+	else if(x){
+		if(write(dst,&c,1) == -1){ // write to dst (with error checking)
 			fprintf(stderr, "Error %i from write: %s\n", errno, strerror(errno));
 			exit(1);
 		}
