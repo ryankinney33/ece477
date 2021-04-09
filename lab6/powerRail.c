@@ -26,7 +26,7 @@ float get_railVoltage(void);
 FILE usart0_str = FDEV_SETUP_STREAM(USART0_Transmit, USART0_Receive, _FDEV_SETUP_RW);
 
 int main(){
-	char buf[100] = "maybe next time";
+	char buf[100] = "Please type \"START\" to start.\n";
 
 	update_clock_speed(); // adjust OSCCAL
 
@@ -34,9 +34,11 @@ int main(){
 	init_ADC(); // initialize ADC0
 	_delay_ms(1000); // let serial do its thing
 
+	// print some information for the user
+	printf("%s",buf);
+
 	// wait to receive "START" on USART0
 	while(strncmp("START",buf,5)){
-//		scanf("%s",buf);
 		fgets(buf,100,stdin);
 	}
 
