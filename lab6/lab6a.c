@@ -22,7 +22,7 @@ int gpio_init();
 int AVR_reset();
 int init_serial();
 
-void start();
+void start(int port);
 void get_data(int serial_port, FILE* file);
 
 static volatile int keepRunning = 1;
@@ -118,22 +118,18 @@ int init_serial(){
 	return port; // return the file descriptor for the port
 }
 
-void start(){
+void start(int port){
 	// buffer
 	char buf[100] = "Please type \"START\" (no quotes) to start.\n";
-	char cmd[256];
 	printf("%s",buf);
 	do{
-		scanf("%s",buf); // get input from stdin
-		sprintf(cmd,"echo -e \"%s\" > %s",buf,DEVICE);
-		if(system(cmd) == -1){ // send the input to the AVR, check for errors
+		fgets(buf,100,stdin); // get input from stdin
+		if(write(port,buf,strlen(buf)) == -1){
 			fprintf(stderr, "Error %i during write: %s\n", errno, strerror(errno));
 			exit(1);
 		}
-	}while(strncmp(buf,"START",strlen(buf))); // stop getting input once "START" is sent
+	}while(strncmp(buf,"START",5)); // stop getting input once the first 5 characters of buf are 'START'
 }
-
-
 
 void get_data(int serial_port, FILE* file){
 	static char buf[100] = "\0"; // input buffer
@@ -149,9 +145,9 @@ void get_data(int serial_port, FILE* file){
 		// iterate through the buffer, writing numbers, periods, and newlines
 		for(int i = 0; i < strlen(buf); ++i){
 			if(isdigit(buf[i]) || buf[i] == '.'){
-				fputc(buf[i],file);
+				fputc(buf[i],file); // number or decimal point, write it
 			}else if(buf[i] == 'V'){
-				fputc('\n',file);
+				fputc('\n',file); // end of number, add newline
 			}
 		}
 	}

@@ -35,8 +35,9 @@ int main(){
 	_delay_ms(1000); // let serial do its thing
 
 	// wait to receive "START" on USART0
-	while(strncmp("START",buf,strlen(buf))){
-		scanf("%s",buf);
+	while(strncmp("START",buf,5)){
+//		scanf("%s",buf);
+		fgets(buf,100,stdin);
 	}
 
 	while(1){ // busy loop; Pi controls reset
