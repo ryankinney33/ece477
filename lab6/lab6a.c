@@ -119,16 +119,11 @@ int init_serial(){
 }
 
 void start(int port){
-	// buffer
-	char buf[100] = "Please type \"START\" (no quotes) to start.\n";
-	printf("%s",buf);
-	do{
-		fgets(buf,100,stdin); // get input from stdin
-		if(write(port,buf,strlen(buf)) == -1){
-			fprintf(stderr, "Error %i during write: %s\n", errno, strerror(errno));
-			exit(1);
-		}
-	}while(strncmp(buf,"START",5)); // stop getting input once the first 5 characters of buf are 'START'
+	char buf[100] = "START\n";
+	if(write(port,buf,strlen(buf)) == -1){
+		fprintf(stderr, "Error %i during write: %s\n", errno, strerror(errno));
+		exit(1);
+	}
 }
 
 void get_data(int serial_port, FILE* file){
