@@ -1,3 +1,16 @@
+/*
+
+	The purpose of this program is to send
+	"START" to an AVR over serial. This program
+	will then read strings from the serial, printf
+	them to stdout, and save the numbers in a file
+	called rail_voltages.dat
+
+	Author: Ryan Kinney
+	ECE 477 - Spring 2021
+	April 9, 2021
+
+*/
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>

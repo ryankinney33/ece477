@@ -1,3 +1,18 @@
+/*
+
+	The purpose of this program is to be a simple
+	serial terminal to communicate with a the AVR.
+	Starts bby resetting the AVR before writing all
+	data from stdin to the serial port and all data from
+	the serial port to stdout.
+
+	Author: Ryan Kinney
+	ECE 477 - Spring 2021
+	April 9, 2021
+
+*/
+
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

@@ -1,3 +1,22 @@
+/*
+
+	The purpose of this program is to estimate the
+	power rail voltage by reading the bandgap
+	voltage on the ADC.
+
+	Sends that data over USART once per second
+	after receiving "START" via USART, Uses stdin
+	and stdout streams for interfacing with the USART.
+
+	Author: Ryan Kinney
+	ECE 477 - Spring 2021
+	April 9, 2021
+
+*/
+
+
+
+
 #define F_CPU 8000000UL // 8 MHz oscillator
 #define BAUD 9600UL // 9600 baud rate for USART
 
