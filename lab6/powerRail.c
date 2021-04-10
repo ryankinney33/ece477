@@ -133,6 +133,6 @@ int16_t get_ADC(void){
 
 float get_railVoltage(void){
 	// finds the reference voltage based on the ADC value
-	// 1.1*/Vref = ADC
+	// 1.1*0x3FF/Vref = ADC
 	return( (1.1f*(float)0x3FF)/(float)get_ADC());
 }
