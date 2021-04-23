@@ -14,6 +14,8 @@
 // Macros to help extract the button data from the read values
 #include "CCCons.h"
 
+static const char keyMap[18] = "ABXY-+H^V<>ZLZRLR"; //button layout of con->B
+
 // open the i2c device, choose which device to communicate with and return the file descriptor
 int i2c_init(char* filepath,int addr){
 	// open the I2C device for reading and writing
@@ -49,7 +51,7 @@ void unencrypt(int fd){
 	}
 
 	// give the controller some time
-	usleep(200);
+	usleep(2000);
 
 	// write second byte
 	if(write(fd, msg2, 2) != 2){
@@ -99,10 +101,10 @@ void con_init(WiiClassic* con, char* filepath, int addr){
 // Update the button data in the structure
 void con_update(WiiClassic* con){
 	// buffer for holding the read data
-	static unsigned char buf[6] = {0,0,0,0,0,0}
+	static unsigned char values[6] = {0,0,0,0,0,0};
 
-	// read the button data from the controller into buf
-	read_controller(con->fd,buf);
+	// read the button data from the controller into values
+	read_controller(con->fd,values);
 
 	// use bitwise logic to get the data out of buf
 
@@ -141,4 +143,50 @@ void con_update(WiiClassic* con){
 	con->rx = ((values[0]>>RX_0)&0x3)<<3; // need 3 open bits
 	con->rx |= ((values[1]>>RX_1)&0x3)<<1; // need 1 open bit
 	con->rx |= (values[3]>>RX_2)&0x1;
+}
+
+// print all the controller data to stdout
+void con_dump_data(WiiClassic* con){
+	// digital inputs
+	for(int i = 0, k = 0; i < 15 && k < 18; ++i){
+		char key[] = {keyMap[k++],0,0};
+		if(key[0] == 'Z')
+			key[1] = keyMap[k++];
+		printf("%s = %d\n",key,con->B[i]);
+	}
+
+	// analog inputs
+	printf("RX = %d\n",con->rx);
+	printf("RY = %d\n",con->ry);
+	printf("LX = %d\n",con->lx);
+	printf("LY = %d\n",con->ly);
+	printf("RT = %d\n",con->rt);
+	printf("LT = %d\n",con->lt);
+
+}
+
+// Print which buttons were just pressed/released
+void con_status(WiiClassic* current, WiiClassic* previous){
+	// The logic for telling if a button is the result of previous - current
+	// If 0, no change (either button is not pressed or held)
+	// If 1, button pressed
+	// If -1, button released
+	for(int i = 0, k = 0; i < 15; ++i){
+		char state[12];
+		// string for what button we are on
+		char key[] = {keyMap[k++],0,0};
+		if(key[0] == 'Z')
+			key[1] = keyMap[k++];
+
+		int status = previous->B[i]-current->B[i];
+		if(!status) // no change
+			//sprintf(state,"%s",current->B[i]? "not pressed":"held");
+			continue;
+		else if(status == 1)
+			sprintf(state,"%s","pressed");
+		else
+			sprintf(state,"%s","released");
+
+		printf("%s was %s\n",key,state);
+	}
 }

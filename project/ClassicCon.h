@@ -11,7 +11,7 @@ typedef struct WiiClassic{
 
 	unsigned int rt:5, lt:5; // Analog switches of LT and RT
 
-	unsigned int B[15]; // {A,B,X,Y,-,+,H,^,V,<,>,ZL,ZR,L,R}
+	unsigned char B[15]; // {A,B,X,Y,-,+,H,^,V,<,>,ZL,ZR,L,R}
 
 	int fd; // the file descriptor for the i2c device
 } WiiClassic;
