@@ -9,47 +9,10 @@
 #include <linux/i2c-dev.h>
 #include <sys/ioctl.h>
 
-// open the i2c device, choose which device to communicate with and return the file descriptor
-int i2c_init(char* filepath,int addr);
+#include "ClassicCon.h"
 
-// unencrypt the controller
-void unencrypt(int fd);
-
-// buf is a pointer to an array of 6 bytes allocated by the caller
-void read_controller(int fd, unsigned char* buf);
-
-int main(){
-	// TODO: command line arguments
-	int adapter_num = 1; // TODO: this should not be hard-coded
-	char filename[20];
-	snprintf(filename,19, "/dev/i2c-%d", adapter_num);
-
-	unsigned char buf[6]; // holds the 6 bytes from the controller
-
-	// initialize the communication
-	int address = 0x52; // TODO: this should not be hard-coded
-	int fd = i2c_init(filename,address);
-
-	// unencrypt the controller
-	unencrypt(fd);
-
-
-	int flag = 1;
-	while(flag){
-		read_controller(fd,buf);
-
-		for(int i = 0; i < 6; ++i){
-			flag = flag && buf[i]==good[i];
-		}
-		if(flag)
-			printf("PASSED!\n");
-		else
-			printf("FAILED!\n");
-	}
-
-
-	exit(0);
-}
+// Macros to help extract the button data from the read values
+#include "CCCons.h"
 
 // open the i2c device, choose which device to communicate with and return the file descriptor
 int i2c_init(char* filepath,int addr){
@@ -71,7 +34,7 @@ int i2c_init(char* filepath,int addr){
 	return fd;
 }
 
-// writes some bytes to decrypt the controller
+// writes some bytes to unencrypt the controller
 void unencrypt(int fd){
 	// to unencrypt, write 0x55 to 0xF0 then 0x00 to 0xFB
 	static unsigned char msg1[] = {0xF0,0x55};
@@ -93,21 +56,25 @@ void unencrypt(int fd){
 		fprintf(stderr,"Could not write %x to %x.\n",msg2[1],msg2[0]);
 		exit(1);
 	}
+
+	// the controller is now unencrypted and ready for use
 }
 
 // buf is a pointer to an array of 6 bytes allocated by the caller
-void read_controller(int fd, unsigned char* buf){
+int read_controller(int fd, unsigned char* buf){
 	// first, write 0x00
 	static const unsigned char send[1] = {0x00};
 	if(write(fd,send,1) != 1){
 		fprintf(stderr,"Error %i from write: %s\n",errno,strerror(errno));
-		return;
+		return -1;
 	}
 
 	// controller needs time
 	usleep(200);
 
 	// read 6 bytes into buf
-	if(read(fd,buf,6) != 6)
+	if(read(fd,buf,6) != 6){
 		fprintf(stderr,"Error %i from read: %s\n",errno,strerror(errno));
+		return -1;
+	}
 }

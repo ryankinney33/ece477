@@ -9,7 +9,7 @@ OBJS=main.o ClassicCon.o
 all: main.out
 
 main.out: $(OBJS)
-	$(CC) -o main.out $(OBJS) -lwiringPi
+	$(CC) -o main.out $(OBJS)
 
 %.o: %.c
 	$(CC) -c $< -o $@
