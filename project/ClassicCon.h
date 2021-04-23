@@ -25,7 +25,7 @@ void con_init(WiiClassic* con, char* filepath, int addr);
 
 // Reads the data from the controller and updates
 // the passed WiiClassic struct
-int con_update(WiiClassic* con);
+void con_update(WiiClassic* con);
 
 // Dumps the raw data for each button and analog input to stdout
 void con_dump_data(WiiClassic* con);

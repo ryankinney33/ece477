@@ -44,6 +44,7 @@ void unencrypt(int fd){
 	if(write(fd, msg1, 2) != 2){
 		fprintf(stderr,"Error %i from write: %s\n",errno,strerror(errno));
 		fprintf(stderr,"Could not write %x to %x.\n",msg1[1],msg1[0]);
+		close(fd);
 		exit(1);
 	}
 
@@ -54,6 +55,7 @@ void unencrypt(int fd){
 	if(write(fd, msg2, 2) != 2){
 		fprintf(stderr,"Error %i from write: %s\n",errno,strerror(errno));
 		fprintf(stderr,"Could not write %x to %x.\n",msg2[1],msg2[0]);
+		close(fd);
 		exit(1);
 	}
 
@@ -61,12 +63,13 @@ void unencrypt(int fd){
 }
 
 // buf is a pointer to an array of 6 bytes allocated by the caller
-int read_controller(int fd, unsigned char* buf){
+void read_controller(int fd, unsigned char* buf){
 	// first, write 0x00
 	static const unsigned char send[1] = {0x00};
 	if(write(fd,send,1) != 1){
 		fprintf(stderr,"Error %i from write: %s\n",errno,strerror(errno));
-		return -1;
+		close(fd);
+		exit(1);
 	}
 
 	// controller needs time
@@ -75,6 +78,67 @@ int read_controller(int fd, unsigned char* buf){
 	// read 6 bytes into buf
 	if(read(fd,buf,6) != 6){
 		fprintf(stderr,"Error %i from read: %s\n",errno,strerror(errno));
-		return -1;
+		close(fd);
+		exit(1);
 	}
+}
+
+// Initialize the controller structure
+void con_init(WiiClassic* con, char* filepath, int addr){
+	// first open i2c and start communicating with the device
+	con->fd = i2c_init(filepath,addr);
+
+	// next, unencrypt the controller's registers to read the data
+	unencrypt(con->fd);
+
+	// finally, read the data from the controller to initialize the
+	// the data in the struct
+	con_update(con);
+}
+
+// Update the button data in the structure
+void con_update(WiiClassic* con){
+	// buffer for holding the read data
+	static unsigned char buf[6] = {0,0,0,0,0,0}
+
+	// read the button data from the controller into buf
+	read_controller(con->fd,buf);
+
+	// use bitwise logic to get the data out of buf
+
+	// start with A/B/X/Y
+	con->B[0] = (values[5]>>BA_5)&1; // A
+	con->B[1] = (values[5]>>BB_5)&1; // B
+	con->B[2] = (values[5]>>BX_5)&1; // X
+	con->B[3] = (values[5]>>BY_5)&1; // Y
+
+	// Minus/plus/home
+	con->B[4] = (values[4]>>BM_4)&1; // -
+	con->B[5] = (values[4]>>BP_4)&1; // +
+	con->B[6] = (values[4]>>BH_4)&1; // H
+
+	// next do D-pad
+	con->B[7] = (values[5]>>BDU_5)&1;  // ^
+	con->B[8] = (values[4]>>BDD_4)&1;  // V
+	con->B[9] = (values[5]>>BDL_5)&1;  // <
+	con->B[10] = (values[4]>>BDR_4)&1; // >
+
+	// Trigger/shoulder buttons
+	con->B[11] = (values[5]>>BZL_5)&1; // ZL
+	con->B[12] = (values[5]>>BZR_5)&1; // ZR
+	con->B[13] = (values[4]>>BLT_4)&1; // L
+	con->B[14] = (values[4]>>BRT_4)&1; // R
+
+	// Analog triggers next
+	con->rt = (values[3]>>RT_3)&0x1F;
+	con->lt = (values[2]&(0x3<<LT_2)) >> 2; // 2 = LT_2-3
+	con->lt |= (values[3]>>LT_3)&0x7;
+
+	// Analog joysticks next
+	con->lx = (values[0]>>LX_0)&0x3F;
+	con->ly = (values[1]>>LY_1)&0x3F;
+	con->ry = (values[2]>>RY_2)&0x1F;
+	con->rx = ((values[0]>>RX_0)&0x3)<<3; // need 3 open bits
+	con->rx |= ((values[1]>>RX_1)&0x3)<<1; // need 1 open bit
+	con->rx |= (values[3]>>RX_2)&0x1;
 }
