@@ -23,7 +23,7 @@ typedef struct WiiClassic {
 } WiiClassic;
 
 void con_init(WiiClassic* con); // initializes the controller
-void con_update(WiiClassic* con); // updates the buttons
+int con_update(WiiClassic* con); // updates the buttons
 void con_dump_buttons(WiiClassic* con); // prints the button status to stdout
 void con_print_dig_status(WiiClassic* current, WiiClassic* previous);
 #endif

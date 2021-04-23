@@ -1,5 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+
+#include <errno.h>
+
 #include <wiringPi.h>
 #include <wiringPiI2C.h>
 
@@ -13,19 +17,21 @@ static const char keyMap[18] = "ABXY-+H^V<>ZLZRLR"; //button layout of con->B
 void con_init(WiiClassic* con){
 	con->fd = wiringPiI2CSetup(DEVICE_ID);
 	if(con->fd == -1){
-		printf("Failed to initialize I2C communication.\n");
+		fprintf(stderr,"Error %i from wiringPiI2CSetup: %s\n",errno,strerror(errno));
 		exit(1);
 	}
 
 	// unencrypt the registers
 	// The devices are unencrypted by writing 0x55 to 0xF0 and then 0x00 to 0xFB
 	if(wiringPiI2CWriteReg8(con->fd, 0xF0, 0x55) == -1){
-		printf("Writing 0x55 to 0xF0 failed.\n");
+		fprintf(stderr,"Error writing 0x55 to 0xF0.\n");
+		fprintf(stderr,"Error %i from wiringPiI2CWriteReg8: %s\n",errno,strerror(errno));
 		exit(1);
 	}
 
 	if(wiringPiI2CWriteReg8(con->fd,0xFB, 0x00) == -1){
-		printf("Writing 0x00 to 0xFB failed.\n");
+		fprintf(stderr,"Error writing 0x00 to 0xFB.\n");
+		fprintf(stderr,"Error %i from wiringPiI2CWriteReg8: %s\n",errno,strerror(errno));
 		exit(1);
 	}
 
@@ -33,22 +39,26 @@ void con_init(WiiClassic* con){
 	con_update(con);
 }
 
-void con_update(WiiClassic* con){
+int con_update(WiiClassic* con){
 	unsigned char values[6]; // There are 6 1-byte registers with the information for button presses
 
 	// write zero to reset offset for reading bytes
 	if(wiringPiI2CWrite(con->fd, 0x00) < 0){
 		//printf("Failed to write 0x00\n");
-		perror("Error");
+		fprintf(stderr,"Error %i writing 0x00: %s\n",errno,strerror(errno));
+		for(int i = 0; i < 0xF5; ++i){
+			wiringPiI2CRead(con->fd);// read a bunch of junk values
+		}
+		return -1;
 	}else{
 		// read the junk value to get to required data
-//		wiringPiI2CRead(con->fd);
+		wiringPiI2CRead(con->fd);
 
 
 		// reads the 6 bytes for the button data. Stores them in an array
 		for(int i = 0; i < 0x6; ++i){
 			values[i] = (unsigned char)wiringPiI2CRead(con->fd);
-			//printf("%x\n",values[i]); // used for debugging purposes
+//			printf("%x\n",values[i]); // used for debugging purposes
 		}
 
 		//printf("\n"); // used for debugging
@@ -90,6 +100,7 @@ void con_update(WiiClassic* con){
 		con->rx = ((values[0]>>RX_0)&0x3)<<3; // need 3 open bits
 		con->rx |= ((values[1]>>RX_1)&0x3)<<1; // need 1 open bit
 		con->rx |= (values[3]>>RX_2)&0x1;
+		return 0;
 	}
 }
 

@@ -8,16 +8,15 @@ int main() {
 	// make and initialize the controller struct
 	WiiClassic con, prev;
 	con_init(&con);
-
+//	printf("\n");
 	prev = con;
 
 	while(1){
-		//con_dump_buttons(&con); // print the current status of the controller
-		con_update(&con); // get new button data
-		con_print_dig_status(&con,&prev);
-		prev = con;
-
-		//printf("\n");
+//		con_dump_buttons(&con); // print the current status of the controller
+		if(!con_update(&con)){; // get new button data
+			con_print_dig_status(&con,&prev);
+			prev = con;
+		}
 	}
 	return 0;
 }
