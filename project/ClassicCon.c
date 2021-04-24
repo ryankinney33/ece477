@@ -114,7 +114,7 @@ void con_update(WiiClassic* con){
 	// read the button data from the controller into values
 	read_controller(con->fd,values);
 
-	// use bitwise logic to get the data out of buf
+	// use bitwise logic to get the data out of values
 
 	// start with A/B/X/Y
 	con->B[0] = (values[5]>>BA_5)&1; // A
@@ -156,21 +156,22 @@ void con_update(WiiClassic* con){
 // Print which buttons were just pressed/released
 void con_status(WiiClassic* current, WiiClassic* previous){
 	static int initColors = 1;
-	
+
 	if(initColors){
 		initColors = 0;
-		// digital buttons will be green
+		// pressed buttons will be green
 		init_pair(1,COLOR_GREEN,COLOR_BLACK);
-		
-		// analog switches will be red
+
+		// not pressed buttons will be red
 		init_pair(2,COLOR_RED,COLOR_BLACK);
+
+		// analog switches will be cyan
+		init_pair(3,COLOR_CYAN,COLOR_BLACK);
 	}
-	
+
 	// move the cursor back to 0,0
 	move(0,0);
-	
-	// first, print the states of the digital switches
-	attrset(COLOR_PAIR(1) | A_BOLD); // set the color to green
+
 	// The logic for telling the state of a button is the result of previous - current
 	// If 0, no change (either button is not pressed or held)
 	// If 1, button pressed
@@ -189,21 +190,24 @@ void con_status(WiiClassic* current, WiiClassic* previous){
 			sprintf(state,"%s","was pressed");
 		else
 			sprintf(state,"%s","was released");
+
+		// choose the color based on current->B[i]
+		attrset(COLOR_PAIR(current->B[i]+1)|A_BOLD);
 		// print the string to the buffer
 		printw("%s %s\n",key,state);
+		attroff(COLOR_PAIR(current->B[i]+1));
+		attroff(A_BOLD);
 	}
-	attroff(COLOR_PAIR(1)); // reset the color
-	attroff(A_BOLD);
 
 	// next, the analog switches
-	attrset(COLOR_PAIR(2) | A_BOLD);
+	attrset(COLOR_PAIR(3) | A_BOLD);
 	printw("\nLX = %2d\n",current->lx);
 	printw("LY = %2d\n",current->ly);
 	printw("LT = %2d\n",current->lt);
 	printw("RT = %2d\n",current->rt);
 	printw("RY = %2d\n",current->ry);
 	printw("RX = %2d\n",current->rx);
-	attroff(COLOR_PAIR(2));
+	attroff(COLOR_PAIR(3));
 	attroff(A_BOLD);
 	// flush the buffer, updating the screen
 	refresh();
