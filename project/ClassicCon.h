@@ -1,3 +1,13 @@
+/*
+ * The purpose of this file is to declare the functions
+ * used to interface with the Wii Classic Controller Pro
+ *
+ * Author: Ryan Kinney
+ * ECE 477 - Spring 2021
+ * April 24, 2021
+ *
+ */
+
 #ifndef _CLASSIC_CON_H_
 #define _CLASSIC_CON_H_
 

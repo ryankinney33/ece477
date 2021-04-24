@@ -15,7 +15,7 @@ main.out: $(OBJS)
 	$(CC) -c $< -O2 -o $@
 
 main.o: main.c ClassicCon.h
-ClassicCon.o: ClassicCon.c ClassicCon.h CCCons.h
+ClassicCon.o: ClassicCon.c ClassicCon.h
 
 clean:
 	rm -rf *.out *.o

@@ -1,3 +1,13 @@
+/*
+ * A driver program showing an example of using
+ * the Wii Classic Controller interface.
+ *
+ * Author: Ryan Kinney
+ * ECE 477 - Spring 2021
+ * April 24, 2021
+ *
+ */
+
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -45,10 +55,12 @@ int main(int argc, char* argv[]){
 			if(start_color() != OK){
 				endwin();
 				fprintf(stderr,"Could not start colors.\n");
+				outputMode = 1; // revert to old output method
 			}
 		}else{
 			endwin();
 			fprintf(stderr,"Terminal does not support colors\n");
+			outputMode = 1; // rever to old output method
 		}
 	}
 	while(keepRunning){
@@ -75,3 +87,6 @@ int main(int argc, char* argv[]){
 
 	exit(0);
 }
+
+// TODO: Use uinput to make the controller act
+//       as keyboard for use in games and stuff

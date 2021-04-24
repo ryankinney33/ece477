@@ -1,3 +1,14 @@
+/*
+ * Defines the functions to communicate with the Wii Classic Controller
+ * Uses i2c for commuincation and curses to show the output.
+ *
+ * Author: Ryan Kinney
+ * ECE 477 - Spring 2021
+ * April 24, 2021
+ *
+ */
+
+
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -13,8 +24,50 @@
 
 #include "ClassicCon.h"
 
-// Macros to help extract the button data from the read values
-#include "CCCons.h"
+/******************************************************/
+// Macros for bit location offsets to map the registers
+// to the variables describing each button
+
+// Right analog stick
+#define RX_0 6
+#define RX_1 6
+#define RX_2 7
+#define RY_2 0
+
+// Left analog stick
+#define LX_0 0
+#define LY_1 0
+
+// Right trigger
+#define RT_3 0
+
+// Left trigger
+#define LT_2 5
+#define LT_3 5
+
+// Minus/Plus/Home buttons
+#define BM_4 4
+#define BH_4 3
+#define BP_4 2
+
+// Trigger/Shoulder buttons
+#define BRT_4 1
+#define BLT_4 5
+#define BZL_5 7
+#define BZR_5 2
+
+// A/B/X/Y buttons
+#define BB_5 6
+#define BY_5 5
+#define BA_5 4
+#define BX_5 3
+
+// D-pad buttons
+#define BDR_4 7
+#define BDD_4 6
+#define BDL_5 1
+#define BDU_5 0
+/******************************************************/
 
 static const char keyMap[18] = "ABXY-+H^V<>ZLZRLR"; //button layout of con->B
 
@@ -43,8 +96,8 @@ int i2c_init(char* filepath,int addr){
 // writes some bytes to unencrypt the controller
 void unencrypt(int fd){
 	// to unencrypt, write 0x55 to 0xF0 then 0x00 to 0xFB
-	static unsigned char msg1[] = {0xF0,0x55};
-	static unsigned char msg2[] = {0xFB,0x00};
+	static const unsigned char msg1[] = {0xF0,0x55};
+	static const unsigned char msg2[] = {0xFB,0x00};
 
 	// write first byte
 	if(write(fd, msg1, 2) != 2){
@@ -162,7 +215,7 @@ void con_status(WiiClassic* current, WiiClassic* previous){
 		// pressed buttons will be green
 		init_pair(1,COLOR_GREEN,COLOR_BLACK);
 
-		// not pressed buttons will be red
+		// not pressed buttons will be black
 		init_pair(2,COLOR_RED,COLOR_BLACK);
 
 		// analog switches will be cyan
@@ -241,3 +294,9 @@ void con_print_buttons(WiiClassic* current, WiiClassic* previous){
 	}
 }
 
+/*
+ * TODO:
+ *  Games and stuff don't really care about printing the status
+ *  of the buttons and stuff. Write functions to return the states
+ *  of the buttons that another program can use to process the information
+ */
