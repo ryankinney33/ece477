@@ -197,7 +197,7 @@ void con_status(WiiClassic* current, WiiClassic* previous){
 
 	// next, the analog switches
 	attrset(COLOR_PAIR(2) | A_BOLD);
-	printw("LX = %2d\n",current->lx);
+	printw("\nLX = %2d\n",current->lx);
 	printw("LY = %2d\n",current->ly);
 	printw("LT = %2d\n",current->lt);
 	printw("RT = %2d\n",current->rt);

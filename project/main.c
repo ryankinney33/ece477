@@ -13,51 +13,65 @@ void sigint_handler(int x){
 	keepRunning = 0;
 }
 
-int main(){
+int main(int argc, char* argv[]){
 	// handle SIGINT
 	struct sigaction act;
 	act.sa_handler = sigint_handler;
 	sigaction(SIGINT, &act, NULL);
 
-	// TODO: command line arguments
 	int adapter_num = 1; // TODO: this should not be hard-coded
 	char filename[20];
 	snprintf(filename,19, "/dev/i2c-%d", adapter_num);
-
 	int address = 0x52; // TODO: this should not be hard-coded
 
 	// initialize structures for the current and previous controller values
 	WiiClassic con, prev;
 	con_init(&con, filename, address);
 	prev = con;
-	
-	// create the ncurses output screen
-	initscr();
-	curs_set(0); // hide the cursor
-	
-	// attempt to start colored output
-	if(has_colors()){
-		if(start_color() != OK){
+
+	// determine which output mode to use based on arguments
+	static int outputMode = 0;
+	if(argc > 1) // if ANY arguments were passed, display when buttons were pressed/released
+		outputMode = 1;
+	// TODO: better command line arguments
+
+	if(!outputMode){
+		// create the ncurses output screen
+		initscr();
+		curs_set(0); // hide the cursor
+
+		// attempt to start colored output
+		if(has_colors()){
+			if(start_color() != OK){
+				endwin();
+				fprintf(stderr,"Could not start colors.\n");
+			}
+		}else{
 			endwin();
-			fprintf(stderr,"Could not start colors.\n");
+			fprintf(stderr,"Terminal does not support colors\n");
 		}
-	}else{
-		endwin();
-		fprintf(stderr,"Terminal does not support colors\n");
 	}
 	while(keepRunning){
 		// first, print the controller's status
-		con_status(&con,&prev);
-		// con_print_buttons(&con,&prev);
+		if(!outputMode){
+			con_status(&con,&prev);
+		}else{
+			con_print_buttons(&con,&prev);
+		}
 
 		// update the previous
 		prev = con;
 
-		// update the controller
+		// get new input
 		con_update(&con);
 	}
-	// execution finished, close the window
-	endwin();
+
+	// print a newline or close the screen
+	if(outputMode)
+		printf("\n");
+	else
+		// execution finished, close the window
+		endwin();
 
 	exit(0);
 }
