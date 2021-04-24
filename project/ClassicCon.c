@@ -154,7 +154,7 @@ void con_update(WiiClassic* con){
 }
 
 // Print which buttons were just pressed/released
-void con_button_status(WiiClassic* current, WiiClassic* previous){
+void con_status(WiiClassic* current, WiiClassic* previous){
 	// move the cursor back to 0,0
 	move(0,0);
 	
@@ -193,3 +193,32 @@ void con_button_status(WiiClassic* current, WiiClassic* previous){
 	// flush the buffer, updating the screen
 	refresh();
 }
+
+
+// Prints which buttons were just pressed/released to stdout on multiple lines
+void con_print_buttons(WiiClassic* current, WiiClassic* previous){
+
+	// The logic for telling if a button is the result of previous - current
+	// If 0, no change (either button is not pressed or held)
+	// If 1, button pressed
+	// If -1, button released
+	for(int i = 0, k = 0; i < 15; ++i){
+		char state[12];
+		// string for what button we are on
+		char key[] = {keyMap[k++],0,0};
+		if(key[0] == 'Z')
+			key[1] = keyMap[k++];
+
+		int status = previous->B[i]-current->B[i];
+		if(!status) // no change
+			//sprintf(state,"%s",current->B[i]? "not pressed":"held");
+			continue;
+		else if(status == 1)
+			sprintf(state,"%s","pressed");
+		else
+			sprintf(state,"%s","released");
+
+		printf("%s was %s\n",key,state);
+	}
+}
+

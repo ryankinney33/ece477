@@ -36,8 +36,8 @@ int main(){
 	curs_set(0); // hide the cursor
 	while(keepRunning){
 		// first, print the controller's status
-		con_button_status(&con,&prev);
-		// con_analog(&con);
+		//con_status(&con,&prev);
+		con_print_buttons(&con,&prev);
 
 		// update the previous
 		prev = con;
