@@ -33,4 +33,6 @@ void con_dump_data(WiiClassic* con);
 // Prints which buttons were just pressed/released
 void con_status(WiiClassic* current, WiiClassic* previous);
 
+// Prints the values of the analog switches on one line
+void con_analog(WiiClassic* con);
 #endif

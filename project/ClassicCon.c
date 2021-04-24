@@ -142,7 +142,7 @@ void con_update(WiiClassic* con){
 	con->ry = (values[2]>>RY_2)&0x1F;
 	con->rx = ((values[0]>>RX_0)&0x3)<<3; // need 3 open bits
 	con->rx |= ((values[1]>>RX_1)&0x3)<<1; // need 1 open bit
-	con->rx |= (values[3]>>RX_2)&0x1;
+	con->rx |= (values[2]>>RX_2)&0x1;
 }
 
 // print all the controller data to stdout
@@ -155,14 +155,13 @@ void con_dump_data(WiiClassic* con){
 		printf("%s = %d\n",key,con->B[i]);
 	}
 
-	// analog inputs
+	// print the analog switches
 	printf("RX = %d\n",con->rx);
 	printf("RY = %d\n",con->ry);
 	printf("LX = %d\n",con->lx);
 	printf("LY = %d\n",con->ly);
 	printf("RT = %d\n",con->rt);
-	printf("LT = %d\n",con->lt);
-
+	printf("LT = %d\n\n",con->lt);
 }
 
 // Print which buttons were just pressed/released
@@ -189,4 +188,16 @@ void con_status(WiiClassic* current, WiiClassic* previous){
 
 		printf("%s was %s\n",key,state);
 	}
+}
+
+
+// Prints the values of the analog switches on one line
+void con_analog(WiiClassic* con){
+	static char flag = 1;
+	if(flag){
+		flag = 0;
+		printf("LX\tLY\tLT\tRX\tRY\tRT\n");
+	}
+	printf("\r%2d\t%2d\t%2d\t%2d\t%2d\t%2d",con->lx,con->ly,con->lt,con->rx,con->ry,con->rt);
+	fflush(stdout);	
 }
