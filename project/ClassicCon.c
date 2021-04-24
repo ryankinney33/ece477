@@ -145,7 +145,7 @@ void con_update(WiiClassic* con){
 	con->rx |= (values[2]>>RX_2)&0x1;
 }
 
-// print all the controller data to stdout
+// print all the controller data to stdout on multiple lines
 void con_dump_data(WiiClassic* con){
 	// digital inputs
 	for(int i = 0, k = 0; i < 15 && k < 18; ++i){
@@ -165,7 +165,7 @@ void con_dump_data(WiiClassic* con){
 }
 
 // Print which buttons were just pressed/released
-void con_status(WiiClassic* current, WiiClassic* previous){
+void con_button_status(WiiClassic* current, WiiClassic* previous){
 	// The logic for telling if a button is the result of previous - current
 	// If 0, no change (either button is not pressed or held)
 	// If 1, button pressed
@@ -200,4 +200,40 @@ void con_analog(WiiClassic* con){
 	}
 	printf("\r%2d\t%2d\t%2d\t%2d\t%2d\t%2d",con->lx,con->ly,con->lt,con->rx,con->ry,con->rt);
 	fflush(stdout);	
+}
+
+// Prints the values of all the buttons and analog switches on one line and updates on button press
+void con_status(WiiClassic* con){
+	static char flag = 1;
+	if(flag){
+		flag = 0;
+		// print the header line
+		// first print the keyMap with spaces between each button
+		int k = 0;
+		while(k < 17){
+			char key[3] = {keyMap[k++],0,0};
+			if(key[0] == 'Z') // 2 character key names
+				key[1]=keyMap[k++];
+			printf("%s ",key);
+		}
+		// add the analog switch header
+		printf("LX LY LT RX RY RT\n");
+	}
+
+	// reset the cursor to the start of the line
+	printf("\r");
+
+	// next, go through and print all the digital buttons
+	for(int i = 0; i < 15; i++){
+		if(i < 11 || i > 12){ // one-wide button names
+			printf("%d ",con->B[i]);
+		}else{
+			printf("%2d ",con->B[i]);
+		}
+	}
+
+	// finally, print the analog switch numbers
+	printf("%2d %2d %2d %2d %2d %2d ",con->lx,con->ly,con->lt,con->rx,con->ry,con->rt);
+	fflush(stdout);	
+
 }

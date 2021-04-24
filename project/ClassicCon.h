@@ -30,9 +30,12 @@ void con_update(WiiClassic* con);
 // Dumps the raw data for each button and analog input to stdout
 void con_dump_data(WiiClassic* con);
 
-// Prints which buttons were just pressed/released
-void con_status(WiiClassic* current, WiiClassic* previous);
+// Prints which buttons were just pressed/released to stdout on multiple lines
+void con_button_status(WiiClassic* current, WiiClassic* previous);
 
 // Prints the values of the analog switches on one line
 void con_analog(WiiClassic* con);
+
+// Prints the values of all the buttons and analog switches on one line and updates on button press
+void con_status(WiiClassic* con);
 #endif

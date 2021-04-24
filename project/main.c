@@ -19,8 +19,8 @@ int main(){
 
 	while(1){
 		// first, print the controller's status
-		// con_status(&con,&prev);
-		con_analog(&con);
+		con_status(&con);
+		// con_analog(&con);
 
 		// update the previous
 		prev = con;
