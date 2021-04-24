@@ -5,6 +5,8 @@
 #include <fcntl.h>
 #include <unistd.h>
 
+#include <ncurses.h>
+
 // used for I2C
 #include <linux/i2c-dev.h>
 #include <sys/ioctl.h>
@@ -21,12 +23,14 @@ int i2c_init(char* filepath,int addr){
 	// open the I2C device for reading and writing
 	int fd = open(filepath, O_RDWR);
 	if(fd < 0){ // check for errors
+		endwin();
 		fprintf(stderr,"Error %i during open: %s\n",errno,strerror(errno));
 		exit(1);
 	}
 
 	// communicate with the device specified by address
 	if(ioctl(fd,I2C_SLAVE, addr) < 0){
+		endwin();
 		fprintf(stderr,"Error %i communcating with the device at %x: %s\n",errno,addr,strerror(errno));
 		close(fd);
 		exit(1);
@@ -44,6 +48,7 @@ void unencrypt(int fd){
 
 	// write first byte
 	if(write(fd, msg1, 2) != 2){
+		endwin();
 		fprintf(stderr,"Error %i from write: %s\n",errno,strerror(errno));
 		fprintf(stderr,"Could not write %x to %x.\n",msg1[1],msg1[0]);
 		close(fd);
@@ -55,6 +60,7 @@ void unencrypt(int fd){
 
 	// write second byte
 	if(write(fd, msg2, 2) != 2){
+		endwin();
 		fprintf(stderr,"Error %i from write: %s\n",errno,strerror(errno));
 		fprintf(stderr,"Could not write %x to %x.\n",msg2[1],msg2[0]);
 		close(fd);
@@ -69,6 +75,7 @@ void read_controller(int fd, unsigned char* buf){
 	// first, write 0x00
 	static const unsigned char send[1] = {0x00};
 	if(write(fd,send,1) != 1){
+		endwin();
 		fprintf(stderr,"Error %i from write: %s\n",errno,strerror(errno));
 		close(fd);
 		exit(1);
@@ -79,6 +86,7 @@ void read_controller(int fd, unsigned char* buf){
 
 	// read 6 bytes into buf
 	if(read(fd,buf,6) != 6){
+		endwin();
 		fprintf(stderr,"Error %i from read: %s\n",errno,strerror(errno));
 		close(fd);
 		exit(1);
@@ -166,40 +174,73 @@ void con_dump_data(WiiClassic* con){
 
 // Print which buttons were just pressed/released
 void con_button_status(WiiClassic* current, WiiClassic* previous){
-	// The logic for telling if a button is the result of previous - current
+	// move the cursor back to 0,0
+	move(0,0);
+	
+	// first, print the states of the digital switches
+
+	// The logic for telling the state of a button is the result of previous - current
 	// If 0, no change (either button is not pressed or held)
 	// If 1, button pressed
 	// If -1, button released
 	for(int i = 0, k = 0; i < 15; ++i){
 		char state[12];
 		// string for what button we are on
-		char key[] = {keyMap[k++],0,0};
+		char key[] = {keyMap[k++],' ',0};
 		if(key[0] == 'Z')
 			key[1] = keyMap[k++];
 
 		int status = previous->B[i]-current->B[i];
 		if(!status) // no change
-			//sprintf(state,"%s",current->B[i]? "not pressed":"held");
-			continue;
+			sprintf(state,"%s",current->B[i]? "is not pressed":"is held");
 		else if(status == 1)
-			sprintf(state,"%s","pressed");
+			sprintf(state,"%s","was pressed");
 		else
-			sprintf(state,"%s","released");
-
-		printf("%s was %s\n",key,state);
+			sprintf(state,"%s","was released");
+		// print the string to the buffer
+		printw("%s %s\n",key,state);
 	}
+
+	// next, the analog switches
+	printw("LX = %2d\n",current->lx);
+	printw("LY = %2d\n",current->ly);
+	printw("LT = %2d\n",current->lt);
+	printw("RT = %2d\n",current->rt);
+	printw("RY = %2d\n",current->ry);
+	printw("RX = %2d\n",current->rx);
+
+	// flush the buffer, updating the screen
+	refresh();
 }
 
 
 // Prints the values of the analog switches on one line
 void con_analog(WiiClassic* con){
-	static char flag = 1;
-	if(flag){
-		flag = 0;
-		printf("LX\tLY\tLT\tRX\tRY\tRT\n");
+	static int printHeader = 1;
+	int row = 0;
+	
+	// set the cursor position to (0,0)
+	move(0,0);
+
+	if(printHeader){
+		printHeader = 0;
+		addstr("LX = \nLY = \nLT = \nRT = \nRY = \nRX = \n");
 	}
-	printf("\r%2d\t%2d\t%2d\t%2d\t%2d\t%2d ",con->lx,con->ly,con->lt,con->rx,con->ry,con->rt);
-	fflush(stdout);	
+	// print the switch names
+	move(row++,5);
+	printw("%2d",con->lx);
+	move(row++,5);
+	printw("%2d",con->ly);
+	move(row++,5);
+	printw("%2d",con->lt);
+	move(row++,5);
+	printw("%2d",con->rt);
+	move(row++,5);
+	printw("%2d",con->ry);
+	move(row++,5);
+	printw("%2d",con->rx);
+
+	refresh(); // update teh screen
 }
 
 // Prints the values of all the buttons and analog switches on one line and updates on button press

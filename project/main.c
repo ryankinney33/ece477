@@ -4,6 +4,8 @@
 
 #include <signal.h>
 
+#include <ncurses.h>
+
 #include "ClassicCon.h"
 
 volatile sig_atomic_t keepRunning = 1; // for gracefully exiting the program
@@ -28,10 +30,13 @@ int main(){
 	WiiClassic con, prev;
 	con_init(&con, filename, address);
 	prev = con;
-
+	
+	// create the ncurses output screen
+	initscr();
+	curs_set(0); // hide the cursor
 	while(keepRunning){
 		// first, print the controller's status
-		con_status(&con);
+		con_button_status(&con,&prev);
 		// con_analog(&con);
 
 		// update the previous
@@ -40,6 +45,8 @@ int main(){
 		// update the controller
 		con_update(&con);
 	}
-	printf("\n");
+	// execution finished, close the window
+	endwin();
+
 	exit(0);
 }
