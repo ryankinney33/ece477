@@ -4,7 +4,7 @@
 
 #include <signal.h>
 
-#include <ncurses.h>
+#include <curses.h>
 
 #include "ClassicCon.h"
 
@@ -34,10 +34,21 @@ int main(){
 	// create the ncurses output screen
 	initscr();
 	curs_set(0); // hide the cursor
+	
+	// attempt to start colored output
+	if(has_colors()){
+		if(start_color() != OK){
+			endwin();
+			fprintf(stderr,"Could not start colors.\n");
+		}
+	}else{
+		endwin();
+		fprintf(stderr,"Terminal does not support colors\n");
+	}
 	while(keepRunning){
 		// first, print the controller's status
-		//con_status(&con,&prev);
-		con_print_buttons(&con,&prev);
+		con_status(&con,&prev);
+		// con_print_buttons(&con,&prev);
 
 		// update the previous
 		prev = con;

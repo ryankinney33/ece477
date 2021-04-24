@@ -9,7 +9,7 @@ OBJS=main.o ClassicCon.o
 all: main.out
 
 main.out: $(OBJS)
-	$(CC) -o main.out $(OBJS) -lncurses
+	$(CC) -o main.out $(OBJS) -lcurses
 
 %.o: %.c
 	$(CC) -c $< -O2 -o $@

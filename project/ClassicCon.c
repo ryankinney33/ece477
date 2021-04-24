@@ -5,7 +5,7 @@
 #include <fcntl.h>
 #include <unistd.h>
 
-#include <ncurses.h>
+#include <curses.h>
 
 // used for I2C
 #include <linux/i2c-dev.h>
@@ -155,11 +155,22 @@ void con_update(WiiClassic* con){
 
 // Print which buttons were just pressed/released
 void con_status(WiiClassic* current, WiiClassic* previous){
+	static int initColors = 1;
+	
+	if(initColors){
+		initColors = 0;
+		// digital buttons will be green
+		init_pair(1,COLOR_GREEN,COLOR_BLACK);
+		
+		// analog switches will be red
+		init_pair(2,COLOR_RED,COLOR_BLACK);
+	}
+	
 	// move the cursor back to 0,0
 	move(0,0);
 	
 	// first, print the states of the digital switches
-
+	attrset(COLOR_PAIR(1) | A_BOLD); // set the color to green
 	// The logic for telling the state of a button is the result of previous - current
 	// If 0, no change (either button is not pressed or held)
 	// If 1, button pressed
@@ -181,15 +192,19 @@ void con_status(WiiClassic* current, WiiClassic* previous){
 		// print the string to the buffer
 		printw("%s %s\n",key,state);
 	}
+	attroff(COLOR_PAIR(1)); // reset the color
+	attroff(A_BOLD);
 
 	// next, the analog switches
+	attrset(COLOR_PAIR(2) | A_BOLD);
 	printw("LX = %2d\n",current->lx);
 	printw("LY = %2d\n",current->ly);
 	printw("LT = %2d\n",current->lt);
 	printw("RT = %2d\n",current->rt);
 	printw("RY = %2d\n",current->ry);
 	printw("RX = %2d\n",current->rx);
-
+	attroff(COLOR_PAIR(2));
+	attroff(A_BOLD);
 	// flush the buffer, updating the screen
 	refresh();
 }
