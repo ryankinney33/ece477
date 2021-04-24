@@ -153,25 +153,6 @@ void con_update(WiiClassic* con){
 	con->rx |= (values[2]>>RX_2)&0x1;
 }
 
-// print all the controller data to stdout on multiple lines
-void con_dump_data(WiiClassic* con){
-	// digital inputs
-	for(int i = 0, k = 0; i < 15 && k < 17; ++i){
-		char key[] = {keyMap[k++],0,0};
-		if(key[0] == 'Z')
-			key[1] = keyMap[k++];
-		printf("%s = %d\n",key,con->B[i]);
-	}
-
-	// print the analog switches
-	printf("RX = %d\n",con->rx);
-	printf("RY = %d\n",con->ry);
-	printf("LX = %d\n",con->lx);
-	printf("LY = %d\n",con->ly);
-	printf("RT = %d\n",con->rt);
-	printf("LT = %d\n\n",con->lt);
-}
-
 // Print which buttons were just pressed/released
 void con_button_status(WiiClassic* current, WiiClassic* previous){
 	// move the cursor back to 0,0
@@ -211,70 +192,4 @@ void con_button_status(WiiClassic* current, WiiClassic* previous){
 
 	// flush the buffer, updating the screen
 	refresh();
-}
-
-
-// Prints the values of the analog switches on one line
-void con_analog(WiiClassic* con){
-	static int printHeader = 1;
-	int row = 0;
-	
-	// set the cursor position to (0,0)
-	move(0,0);
-
-	if(printHeader){
-		printHeader = 0;
-		addstr("LX = \nLY = \nLT = \nRT = \nRY = \nRX = \n");
-	}
-	// print the switch names
-	move(row++,5);
-	printw("%2d",con->lx);
-	move(row++,5);
-	printw("%2d",con->ly);
-	move(row++,5);
-	printw("%2d",con->lt);
-	move(row++,5);
-	printw("%2d",con->rt);
-	move(row++,5);
-	printw("%2d",con->ry);
-	move(row++,5);
-	printw("%2d",con->rx);
-
-	refresh(); // update teh screen
-}
-
-// Prints the values of all the buttons and analog switches on one line and updates on button press
-void con_status(WiiClassic* con){
-	static char flag = 1;
-	if(flag){
-		flag = 0;
-		// print the header line
-		// first print the keyMap with spaces between each button
-		int k = 0;
-		while(k < 17){
-			char key[3] = {keyMap[k++],0,0};
-			if(key[0] == 'Z') // 2 character key names
-				key[1]=keyMap[k++];
-			printf("%s ",key);
-		}
-		// add the analog switch header
-		printf("LX LY LT RX RY RT\n");
-	}
-
-	// reset the cursor to the start of the line
-	printf("\r");
-
-	// next, go through and print all the digital buttons
-	for(int i = 0; i < 15; i++){
-		if(i < 11 || i > 12){ // one-wide button names
-			printf("%d ",con->B[i]);
-		}else{
-			printf("%2d ",con->B[i]);
-		}
-	}
-
-	// finally, print the analog switch numbers
-	printf("%2d %2d %2d %2d %2d %2d ",con->lx,con->ly,con->lt,con->rx,con->ry,con->rt);
-	fflush(stdout);	
-
 }
