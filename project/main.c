@@ -40,5 +40,6 @@ int main(){
 		// update the controller
 		con_update(&con);
 	}
+	printf("\n");
 	exit(0);
 }
