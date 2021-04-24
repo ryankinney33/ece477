@@ -2,9 +2,21 @@
 #include <string.h>
 #include <stdlib.h>
 
+#include <signal.h>
+
 #include "ClassicCon.h"
 
+volatile sig_atomic_t keepRunning = 1; // for gracefully exiting the program
+void sigint_handler(int x){
+	keepRunning = 0;
+}
+
 int main(){
+	// handle SIGINT
+	struct sigaction act;
+	act.sa_handler = sigint_handler;
+	sigaction(SIGINT, &act, NULL);
+
 	// TODO: command line arguments
 	int adapter_num = 1; // TODO: this should not be hard-coded
 	char filename[20];
@@ -17,7 +29,7 @@ int main(){
 	con_init(&con, filename, address);
 	prev = con;
 
-	while(1){
+	while(keepRunning){
 		// first, print the controller's status
 		con_status(&con);
 		// con_analog(&con);

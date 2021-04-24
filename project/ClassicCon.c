@@ -148,7 +148,7 @@ void con_update(WiiClassic* con){
 // print all the controller data to stdout on multiple lines
 void con_dump_data(WiiClassic* con){
 	// digital inputs
-	for(int i = 0, k = 0; i < 15 && k < 18; ++i){
+	for(int i = 0, k = 0; i < 15 && k < 17; ++i){
 		char key[] = {keyMap[k++],0,0};
 		if(key[0] == 'Z')
 			key[1] = keyMap[k++];
@@ -198,7 +198,7 @@ void con_analog(WiiClassic* con){
 		flag = 0;
 		printf("LX\tLY\tLT\tRX\tRY\tRT\n");
 	}
-	printf("\r%2d\t%2d\t%2d\t%2d\t%2d\t%2d",con->lx,con->ly,con->lt,con->rx,con->ry,con->rt);
+	printf("\r%2d\t%2d\t%2d\t%2d\t%2d\t%2d ",con->lx,con->ly,con->lt,con->rx,con->ry,con->rt);
 	fflush(stdout);	
 }
 
