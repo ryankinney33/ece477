@@ -93,17 +93,38 @@ int i2c_init(char* filepath,int addr){
 	return fd;
 }
 
+// buf is an array of size numBytes allocated by the caller
+void read_controller(int fd, unsigned char* buf, int numBytes, unsigned char reg){
+	// first, write reg
+	if(write(fd,&reg,1) != 1){
+		endwin();
+		fprintf(stderr,"Error %i from write: %s\n",errno,strerror(errno));
+		close(fd);
+		exit(1);
+	}
+
+	// controller needs time
+	usleep(200);
+
+	// read 6 bytes into buf
+	if(read(fd,buf,numBytes) != numBytes){
+		endwin();
+		fprintf(stderr,"Error %i from read: %s\n",errno,strerror(errno));
+		close(fd);
+		exit(1);
+	}
+}
+
 // writes some bytes to unencrypt the controller
 void unencrypt(int fd){
 	// to unencrypt, write 0x55 to 0xF0 then 0x00 to 0xFB
-	static const unsigned char msg1[] = {0xF0,0x55};
-	static const unsigned char msg2[] = {0xFB,0x00};
+	unsigned char msg1[2] = {0xF0,0x55};
+	unsigned char msg2[2] = {0xFB,0x00};
 
 	// write first byte
 	if(write(fd, msg1, 2) != 2){
 		endwin();
 		fprintf(stderr,"Error %i from write: %s\n",errno,strerror(errno));
-		fprintf(stderr,"Could not write %x to %x.\n",msg1[1],msg1[0]);
 		close(fd);
 		exit(1);
 	}
@@ -115,36 +136,21 @@ void unencrypt(int fd){
 	if(write(fd, msg2, 2) != 2){
 		endwin();
 		fprintf(stderr,"Error %i from write: %s\n",errno,strerror(errno));
-		fprintf(stderr,"Could not write %x to %x.\n",msg2[1],msg2[0]);
 		close(fd);
 		exit(1);
 	}
 
-	// the controller is now unencrypted and ready for use
-}
-
-// buf is a pointer to an array of 6 bytes allocated by the caller
-void read_controller(int fd, unsigned char* buf){
-	// first, write 0x00
-	static const unsigned char send[1] = {0x00};
-	if(write(fd,send,1) != 1){
+	// the controller is now unencrypted; verify a classic controller was connected
+	// read 2 bytes from register 0xFE and make sure 0x0101 is read
+	read_controller(fd,msg1,2,0xFE);
+	if(msg1[0] != 0x01 || msg1[1] != 0x01){
 		endwin();
-		fprintf(stderr,"Error %i from write: %s\n",errno,strerror(errno));
-		close(fd);
-		exit(1);
-	}
-
-	// controller needs time
-	usleep(200);
-
-	// read 6 bytes into buf
-	if(read(fd,buf,6) != 6){
-		endwin();
-		fprintf(stderr,"Error %i from read: %s\n",errno,strerror(errno));
+		fprintf(stderr,"Error: A Wii Classic Controller was not connected.");
 		close(fd);
 		exit(1);
 	}
 }
+
 
 // Initialize the controller structure
 void con_init(WiiClassic* con, char* filepath, int addr){
@@ -162,10 +168,11 @@ void con_init(WiiClassic* con, char* filepath, int addr){
 // Update the button data in the structure
 void con_update(WiiClassic* con){
 	// buffer for holding the read data
-	static unsigned char values[6] = {0,0,0,0,0,0};
+	unsigned char values[6];
 
 	// read the button data from the controller into values
-	read_controller(con->fd,values);
+	// the button data is obtained from a 6 byte read of register 0x00
+	read_controller(con->fd,values,6,0x00);
 
 	// use bitwise logic to get the data out of values
 
