@@ -4,7 +4,7 @@
 
 CC=gcc
 
-OBJS=main.o ClassicCon.o
+OBJS=main.o ClassicController.o
 
 all: main.out
 
@@ -14,8 +14,8 @@ main.out: $(OBJS)
 %.o: %.c
 	$(CC) -c $< -O2 -o $@
 
-main.o: main.c ClassicCon.h
-ClassicCon.o: ClassicCon.c ClassicCon.h
+main.o: main.c ClassicController.h
+ClassicController.o: ClassicController.c ClassicController.h
 
 clean:
 	rm -rf *.out *.o

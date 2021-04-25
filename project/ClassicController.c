@@ -22,7 +22,7 @@
 #include <linux/i2c-dev.h>
 #include <sys/ioctl.h>
 
-#include "ClassicCon.h"
+#include "ClassicController.h"
 
 /******************************************************/
 // Macros for bit location offsets to map the registers

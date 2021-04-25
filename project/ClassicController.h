@@ -8,8 +8,8 @@
  *
  */
 
-#ifndef _CLASSIC_CON_H_
-#define _CLASSIC_CON_H_
+#ifndef _CLASSIC_CONTROLLER_H_
+#define _CLASSIC_CONTROLLER_H_
 
 // A struct that holds all the necessary information to use
 // use the controller. This struct is initialized by calling

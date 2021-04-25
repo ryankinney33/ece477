@@ -16,7 +16,7 @@
 
 #include <curses.h>
 
-#include "ClassicCon.h"
+#include "ClassicController.h"
 
 volatile sig_atomic_t keepRunning = 1; // for gracefully exiting the program
 void sigint_handler(int x){
