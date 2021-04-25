@@ -46,7 +46,7 @@ int main(int argc, char* argv[]){
 	// TODO: better command line arguments
 
 	if(!outputMode){
-		// create the ncurses output screen
+		// create the curses output screen
 		initscr();
 		curs_set(0); // hide the cursor
 
@@ -60,9 +60,10 @@ int main(int argc, char* argv[]){
 		}else{
 			endwin();
 			fprintf(stderr,"Terminal does not support colors\n");
-			outputMode = 1; // rever to old output method
+			outputMode = 1; // revert to old output method
 		}
 	}
+
 	while(keepRunning){
 		// first, print the controller's status
 		if(!outputMode){

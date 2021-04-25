@@ -106,7 +106,7 @@ void read_controller(int fd, unsigned char* buf, int numBytes, unsigned char reg
 	// controller needs time
 	usleep(200);
 
-	// read 6 bytes into buf
+	// read numBytes bytes into buf
 	if(read(fd,buf,numBytes) != numBytes){
 		endwin();
 		fprintf(stderr,"Error %i from read: %s\n",errno,strerror(errno));
@@ -222,7 +222,7 @@ void con_status(WiiClassic* current, WiiClassic* previous){
 		// pressed buttons will be green
 		init_pair(1,COLOR_GREEN,COLOR_BLACK);
 
-		// not pressed buttons will be black
+		// not pressed buttons will be red
 		init_pair(2,COLOR_RED,COLOR_BLACK);
 
 		// analog switches will be cyan
