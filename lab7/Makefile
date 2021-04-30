@@ -10,7 +10,7 @@ CC=avr-gcc
 CFLAGS=-Wall -mmcu=atmega88 -u vfprintf -lprintf_flt -lm -Os
 OBJ2HEX=avr-objcopy
 
-TARGET=temperature
+TARGET=temperatureSlow
 
 ADFLAGS=-C /home/pi/avrdude_gpio.conf -c pi_1 -p m88p
 
