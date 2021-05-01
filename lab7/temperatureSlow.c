@@ -67,7 +67,7 @@ int main(){
 
 	while(1){ // busy loop; Pi controls reset
 		// get the data and send it to the Pi
-		printf("The temperature is approximately %lfC\n",get_temperature());
+		printf("The converter reads: %dC\n",get_ADC());
 		_delay_ms(1000);
 	}
 }

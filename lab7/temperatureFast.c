@@ -30,11 +30,6 @@
 #include <math.h>
 #include <string.h>
 
-// some macros for the values for the slope of the temperature sensor
-// temperature as a function of volts
-#define TSLOPEL 972.222222222f // for the voltage is less than 314mV
-#define TSLOPEH 909.090909091f // for the voltage is more than 314mV
-
 void update_clock_speed(void);
 
 void USART0_init(void);
@@ -50,7 +45,6 @@ FILE usart0_str = FDEV_SETUP_STREAM(USART0_Transmit, USART0_Receive, _FDEV_SETUP
 
 int main(){
 	char buf[100] = "Please type \"START\" to start.\n";
-	float temps[32]; // holds 32 temperature values to print to stdout
 
 	update_clock_speed(); // adjust OSCCAL
 
@@ -67,18 +61,8 @@ int main(){
 	}
 
 	while(1){ // busy loop; Pi controls reset
-		// get the data and send it to the Pi
-		for(int i = 0; i < 32; ++i){
-			temps[i] = get_temperature(); // save the temperatures
-		}
-
-		// next print all the temperatures on separate lines
-		for(int i = 0; i < 32; ++i){
-			printf("%lfC\n",temps[i]);
-		}
-		// reading the temperatures and printing are in different loops
-		// in order to read the temperature 32 times as quickly as possible
-
+		// get the temperature and print it to stdout
+		printf("%lfC\n",get_temperature());
 		_delay_ms(1000); // a short delay
 	}
 }
@@ -166,11 +150,14 @@ int16_t get_ADC(void){
 }
 
 float get_temperature(void){
-	// finds the the temperature based on the ADC value
-	// first, find the voltage
-	float voltage = (float)get_ADC()/(1.1*1024);
+	// finds the temperature based on the ADC value
+	const static float slope = 0.889837f/32.0f; // slope from equation/32 to adjust for averaging
+	// get 32 ADC values
+	int32_t sum = 0;
+	for(int i = 0; i < 32; ++i){
+		sum += get_ADC();
+	}
 
-	// next, convert the voltage to the temperature
-	float slope = ((voltage<0.314f)?TSLOPEL:TSLOPEH); // get slope
-	return (slope*(voltage-0.314)+25); // t - 25 = slope*(v-0.314)
+	// next, convert the ADC to the temperature and return it
+	return((float)sum*slope-284.911f);
 }
